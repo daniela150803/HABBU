@@ -14,6 +14,7 @@ import {
 import { useState } from "react";
 import { HabbuMascot } from "./HabbuMascot";
 import { HabbuCelebrationModal } from "./HabbuCelebrationModal";
+import tareasData from "../data/tareas.json";
 
 interface NutritionHabitsProps {
   onBack: () => void;
@@ -28,33 +29,34 @@ interface Habit {
   icon: React.ReactNode;
 }
 
+function getNutritionIcon(titulo: string) {
+  const t = titulo.toLowerCase();
+  if (t.includes("agua") || t.includes("bebe") || t.includes("jarra") || t.includes("hidratar")) {
+    return <Droplet className="h-6 w-6" />;
+  }
+  if (t.includes("té") || t.includes("infusión") || t.includes("refresco") || t.includes("bebida")) {
+    return <CupSoda className="h-6 w-6" />;
+  }
+  return <Apple className="h-6 w-6" />;
+}
+
+function getRandomNutritionTasks(): Habit[] {
+  const nutritionTasks = tareasData.tareas.filter(
+    (t) => t.categoria === "alimentacion"
+  );
+  const shuffled = [...nutritionTasks].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, 2).map((t) => ({
+    id: String(t.id),
+    title: t.titulo,
+    description: t.descripcion,
+    estimatedTime: `${t.duracion_minutos} minutos`,
+    completed: false,
+    icon: getNutritionIcon(t.titulo),
+  }));
+}
+
 export function NutritionHabits({ onBack }: NutritionHabitsProps) {
-  const [habits, setHabits] = useState<Habit[]>([
-    {
-      id: "1",
-      title: "Tomar más agua",
-      description: "Bebe 2 vasos extra de agua durante el día",
-      estimatedTime: "5 minutos",
-      completed: true,
-      icon: <Droplet className="h-6 w-6" />,
-    },
-    {
-      id: "2",
-      title: "Agregar una fruta o verdura",
-      description: "Incluye al menos una porción en tu comida principal",
-      estimatedTime: "10 minutos",
-      completed: false,
-      icon: <Apple className="h-6 w-6" />,
-    },
-    {
-      id: "3",
-      title: "Reducir una bebida azucarada",
-      description: "Reemplaza una bebida con azúcar por agua o té sin azúcar",
-      estimatedTime: "5 minutos",
-      completed: false,
-      icon: <CupSoda className="h-6 w-6" />,
-    },
-  ]);
+  const [habits, setHabits] = useState<Habit[]>(() => getRandomNutritionTasks());
 
   const [showCelebration, setShowCelebration] = useState(false);
   const [celebrationOpen, setCelebrationOpen] = useState(false);
@@ -238,6 +240,7 @@ export function NutritionHabits({ onBack }: NutritionHabitsProps) {
 
             {/* View More Habits Button */}
             <motion.button
+              onClick={() => setHabits(getRandomNutritionTasks())}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               className="mt-6 w-full rounded-full border-2 border-primary px-6 py-3 text-primary hover:bg-primary/5"

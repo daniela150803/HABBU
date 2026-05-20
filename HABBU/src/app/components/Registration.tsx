@@ -3,6 +3,8 @@ import { Heart, Check, ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import habbuRegImg from "../../imports/5.png";
 import habbuIconImg from "../../imports/3.png";
+import { auth } from "../firebase";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 
 interface RegistrationProps {
   onComplete: (userData: { name: string; email: string }) => void;
@@ -43,7 +45,7 @@ export function Registration({ onComplete, onBack, onGoToLogin }: RegistrationPr
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: Record<string, string> = {};
 
@@ -73,9 +75,31 @@ export function Registration({ onComplete, onBack, onGoToLogin }: RegistrationPr
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0) {
-      // Save data and proceed
-      console.log("Registration data:", formData);
-      onComplete({ name: formData.name, email: formData.email });
+      try {
+        const userCredential = await createUserWithEmailAndPassword(
+          auth,
+          formData.email.trim(),
+          formData.password
+        );
+        if (userCredential.user) {
+          await updateProfile(userCredential.user, {
+            displayName: formData.name.trim()
+          });
+        }
+        console.log("Registration data:", formData);
+        onComplete({ name: formData.name.trim(), email: formData.email.trim() });
+      } catch (error: any) {
+        console.error("Firebase registration error:", error);
+        let errorMsg = "Ocurrió un error al registrar el usuario";
+        if (error.code === "auth/email-already-in-use") {
+          errorMsg = "Este correo ya está registrado";
+        } else if (error.code === "auth/invalid-email") {
+          errorMsg = "El correo no es válido";
+        } else if (error.code === "auth/weak-password") {
+          errorMsg = "La contraseña es muy débil";
+        }
+        setErrors({ ...newErrors, firebase: errorMsg });
+      }
     }
   };
 
@@ -394,6 +418,10 @@ export function Registration({ onComplete, onBack, onGoToLogin }: RegistrationPr
                     </div>
                   </label>
                 </div>
+
+                {errors.firebase && (
+                  <p className="text-center text-sm text-destructive">{errors.firebase}</p>
+                )}
 
                 {/* Submit Button */}
                 <div className="space-y-3">

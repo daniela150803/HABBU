@@ -3,6 +3,8 @@ import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import habbuLoginImg from "../../imports/3.png";
 import { HabbuMascot } from "./HabbuMascot";
+import { auth } from "../firebase";
+import { signInWithEmailAndPassword } from "firebase/auth";
 
 interface LoginProps {
   onComplete: (userData: { name: string; email: string }) => void;
@@ -14,7 +16,7 @@ export function Login({ onComplete, onBack, onGoToRegister }: LoginProps) {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: Record<string, string> = {};
     const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -26,10 +28,28 @@ export function Login({ onComplete, onBack, onGoToRegister }: LoginProps) {
     }
     setErrors(newErrors);
     if (Object.keys(newErrors).length === 0) {
-      const inferredName = formData.email.split("@")[0] || "Usuario";
-      const friendlyName =
-        inferredName.charAt(0).toUpperCase() + inferredName.slice(1);
-      onComplete({ name: friendlyName, email: formData.email });
+      try {
+        const userCredential = await signInWithEmailAndPassword(
+          auth,
+          formData.email.trim(),
+          formData.password
+        );
+        const user = userCredential.user;
+        const displayName = user.displayName || (() => {
+          const inferred = user.email?.split("@")[0] || "Usuario";
+          return inferred.charAt(0).toUpperCase() + inferred.slice(1);
+        })();
+        onComplete({ name: displayName, email: user.email || formData.email.trim() });
+      } catch (error: any) {
+        console.error("Firebase login error:", error);
+        let errorMsg = "Correo o contraseña incorrectos";
+        if (error.code === "auth/user-not-found" || error.code === "auth/wrong-password" || error.code === "auth/invalid-credential") {
+          errorMsg = "Correo o contraseña incorrectos";
+        } else if (error.code === "auth/too-many-requests") {
+          errorMsg = "Demasiados intentos fallidos. Inténtalo más tarde.";
+        }
+        setErrors({ ...newErrors, firebase: errorMsg });
+      }
     }
   };
 
@@ -149,6 +169,10 @@ export function Login({ onComplete, onBack, onGoToRegister }: LoginProps) {
                   ¿Olvidaste tu contraseña?
                 </button>
               </div>
+
+              {errors.firebase && (
+                <p className="text-center text-sm text-destructive">{errors.firebase}</p>
+              )}
 
               <motion.button
                 type="submit"

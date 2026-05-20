@@ -17,6 +17,7 @@ import {
 import { useState } from "react";
 import { HabbuMascot } from "./HabbuMascot";
 import { HabbuCelebrationModal } from "./HabbuCelebrationModal";
+import tareasData from "../data/tareas.json";
 
 interface FitnessHabitsProps {
   onBack: () => void;
@@ -34,36 +35,41 @@ interface Habit {
 
 type EnergyLevel = "low" | "normal" | "high" | null;
 
+function getFitnessIcon(titulo: string) {
+  const t = titulo.toLowerCase();
+  if (t.includes("caminata") || t.includes("paseo") || t.includes("caminar")) {
+    return <Footprints className="h-6 w-6" />;
+  }
+  if (t.includes("escalera")) {
+    return <TrendingUp className="h-6 w-6" />;
+  }
+  if (t.includes("estiramiento") || t.includes("baila") || t.includes("articular") || t.includes("movilidad")) {
+    return <Sparkles className="h-6 w-6" />;
+  }
+  if (t.includes("sentadilla") || t.includes("abdominal") || t.includes("fuerza")) {
+    return <Zap className="h-6 w-6" />;
+  }
+  return <Footprints className="h-6 w-6" />;
+}
+
+function getRandomFitnessTasks(): Habit[] {
+  const fitnessTasks = tareasData.tareas.filter(
+    (t) => t.categoria === "acondicionamiento_fisico"
+  );
+  const shuffled = [...fitnessTasks].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, 2).map((t) => ({
+    id: String(t.id),
+    title: t.titulo,
+    description: t.descripcion,
+    estimatedTime: `${t.duracion_minutos} minutos`,
+    difficulty: t.duracion_minutos <= 8 ? "Fácil" : t.duracion_minutos <= 15 ? "Medio" : "Moderado",
+    completed: false,
+    icon: getFitnessIcon(t.titulo),
+  }));
+}
+
 export function FitnessHabits({ onBack }: FitnessHabitsProps) {
-  const [habits, setHabits] = useState<Habit[]>([
-    {
-      id: "1",
-      title: "Caminar 15 minutos",
-      description: "No es necesario hacerlo todo seguido. Puedes dividirlo en 2 o 3 caminatas cortas",
-      estimatedTime: "15 minutos",
-      difficulty: "Fácil",
-      completed: true,
-      icon: <Footprints className="h-6 w-6" />,
-    },
-    {
-      id: "2",
-      title: "Hacer una pausa para estirarte",
-      description: "Estira tu cuello, brazos y espalda. Relaja tu cuerpo y descansa la mente",
-      estimatedTime: "5 minutos",
-      difficulty: "Fácil",
-      completed: true,
-      icon: <Sparkles className="h-6 w-6" />,
-    },
-    {
-      id: "3",
-      title: "Subir escaleras o moverte más",
-      description: "Usa las escaleras en vez del ascensor o camina mientras hablas por teléfono",
-      estimatedTime: "10 minutos",
-      difficulty: "Fácil",
-      completed: false,
-      icon: <TrendingUp className="h-6 w-6" />,
-    },
-  ]);
+  const [habits, setHabits] = useState<Habit[]>(() => getRandomFitnessTasks());
 
   const [energyLevel, setEnergyLevel] = useState<EnergyLevel>(null);
   const [showCelebration, setShowCelebration] = useState(false);
@@ -284,6 +290,7 @@ export function FitnessHabits({ onBack }: FitnessHabitsProps) {
 
             {/* View More Habits Button */}
             <motion.button
+              onClick={() => setHabits(getRandomFitnessTasks())}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               className="mt-6 w-full rounded-full border-2 border-secondary px-6 py-3 text-secondary hover:bg-secondary/5"

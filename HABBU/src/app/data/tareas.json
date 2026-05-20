@@ -1,0 +1,144 @@
+{
+  "tareas": [
+    {
+      "id": 1,
+      "titulo": "Agua al despertar",
+      "descripcion": "Bebe un vaso de agua al levantarte para activar tu metabolismo e hidratar tu cuerpo tras el descanso.",
+      "duracion_minutos": 2,
+      "categoria": "alimentacion"
+    },
+    {
+      "id": 2,
+      "titulo": "Fruta fresca a media mañana",
+      "descripcion": "Cambia el snack procesado por una fruta de temporada para obtener energía natural, fibra y vitaminas.",
+      "duracion_minutos": 5,
+      "categoria": "alimentacion"
+    },
+    {
+      "id": 3,
+      "titulo": "Mitad de plato verde",
+      "descripcion": "Asegúrate de que al menos la mitad de tu almuerzo o cena esté compuesta por vegetales o ensalada.",
+      "duracion_minutos": 10,
+      "categoria": "alimentacion"
+    },
+    {
+      "id": 4,
+      "titulo": "Té sin azúcar por la tarde",
+      "descripcion": "Sustituye el café con azúcar o el refresco por una infusión herbal o té verde sin endulzar.",
+      "duracion_minutos": 5,
+      "categoria": "alimentacion"
+    },
+    {
+      "id": 5,
+      "titulo": "Masticar despacio y sin pantallas",
+      "descripcion": "Apaga el móvil al comer y mastica cada bocado unas 20 veces para mejorar tu digestión y saciedad.",
+      "duracion_minutos": 20,
+      "categoria": "alimentacion"
+    },
+    {
+      "id": 6,
+      "titulo": "Snack saludable de frutos secos",
+      "descripcion": "Come un puñado pequeño de almendras, nueces o cacahuates naturales sin sal añadida.",
+      "duracion_minutos": 3,
+      "categoria": "alimentacion"
+    },
+    {
+      "id": 7,
+      "titulo": "Prepárate una cena ligera",
+      "descripcion": "Cocina algo sencillo y nutritivo basado en proteínas magras y vegetales, evitando fritos o grasas.",
+      "duracion_minutos": 25,
+      "categoria": "alimentacion"
+    },
+    {
+      "id": 8,
+      "titulo": "Planifica tu menú de mañana",
+      "descripcion": "Escribe o mentaliza qué vas a desayunar, almorzar y cenar mañana para evitar decisiones improvisadas.",
+      "duracion_minutos": 10,
+      "categoria": "alimentacion"
+    },
+    {
+      "id": 9,
+      "titulo": "Sazona con especias, no sal",
+      "descripcion": "Reduce el uso de sal en tu comida principal cocinando con orégano, ajo en polvo, limón o pimienta.",
+      "duracion_minutos": 5,
+      "categoria": "alimentacion"
+    },
+    {
+      "id": 10,
+      "titulo": "Prepara tu agua saborizada natural",
+      "descripcion": "Agrega rodajas de pepino, menta y limón a una jarra de agua fresca para beber durante la jornada.",
+      "duracion_minutos": 10,
+      "categoria": "alimentacion"
+    },
+    {
+      "id": 11,
+      "titulo": "Pausa activa de estiramientos",
+      "descripcion": "Ponte de pie y estira los brazos, espalda baja y cuello para aliviar la tensión acumulada por estar sentado.",
+      "duracion_minutos": 5,
+      "categoria": "acondicionamiento_fisico"
+    },
+    {
+      "id": 12,
+      "titulo": "Caminata rápida post-almuerzo",
+      "descripcion": "Da un paseo de 10 minutos a paso ligero justo después de comer para favorecer la digestión y activar tu energía.",
+      "duracion_minutos": 10,
+      "categoria": "acondicionamiento_fisico"
+    },
+    {
+      "id": 13,
+      "titulo": "Reto de las escaleras hoy",
+      "descripcion": "Usa las escaleras tradicionales en lugar del ascensor en tu casa, oficina o centros comerciales.",
+      "duracion_minutos": 5,
+      "categoria": "acondicionamiento_fisico"
+    },
+    {
+      "id": 14,
+      "titulo": "Sentadillas rápidas en casa",
+      "descripcion": "Haz 3 series de 10 sentadillas controladas mientras esperas a que se caliente tu comida o café.",
+      "duracion_minutos": 5,
+      "categoria": "acondicionamiento_fisico"
+    },
+    {
+      "id": 15,
+      "titulo": "Fortalecimiento abdominal básico",
+      "descripcion": "Realiza 3 series de plancha abdominal manteniendo la posición durante 30 segundos cada vez.",
+      "duracion_minutos": 10,
+      "categoria": "acondicionamiento_fisico"
+    },
+    {
+      "id": 16,
+      "titulo": "Baila con tu canción favorita",
+      "descripcion": "Pon un tema alegre que te encante y baila con energía en tu habitación para elevar tus pulsaciones.",
+      "duracion_minutos": 5,
+      "categoria": "acondicionamiento_fisico"
+    },
+    {
+      "id": 17,
+      "titulo": "Movilidad articular al despertar",
+      "descripcion": "Realiza rotaciones suaves de tobillos, cadera, hombros y muñecas antes de empezar tus labores diarias.",
+      "duracion_minutos": 8,
+      "categoria": "acondicionamiento_fisico"
+    },
+    {
+      "id": 18,
+      "titulo": "Paseo a paso ligero",
+      "descripcion": "Sal a caminar a buen ritmo por tu barrio o un parque cercano para sumar pasos y despejar la mente.",
+      "duracion_minutos": 20,
+      "categoria": "acondicionamiento_fisico"
+    },
+    {
+      "id": 19,
+      "titulo": "Entrenamiento de fuerza con botellas",
+      "descripcion": "Usa dos botellas de agua o latas pesadas como mancuernas para hacer ejercicios de brazos y hombros.",
+      "duracion_minutos": 15,
+      "categoria": "acondicionamiento_fisico"
+    },
+    {
+      "id": 20,
+      "titulo": "Estiramiento relajante nocturno",
+      "descripcion": "Realiza estiramientos prolongados de piernas, espalda y cuello para liberar tensión y dormir mejor.",
+      "duracion_minutos": 10,
+      "categoria": "acondicionamiento_fisico"
+    }
+  ]
+}
