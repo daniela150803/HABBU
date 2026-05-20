@@ -14,9 +14,15 @@ import habbuDashImg from "../../imports/10.png";
 import habbuIconImg from "../../imports/3-2.png";
 import { HabbuCelebrationModal } from "./HabbuCelebrationModal";
 import { HabbuWelcomeModal } from "./HabbuWelcomeModal";
+import { getDailyHabits } from "./habitsData";
 
 interface DashboardProps {
   userName: string;
+  dayStr: string;
+  habitCompletion: Record<string, boolean>;
+  onToggleHabit: (habitId: string) => void;
+  dailyChallengeCompleted: boolean;
+  onToggleDailyChallenge: () => void;
   onViewChallenge?: () => void;
   onViewNutritionHabits?: () => void;
   onViewFitnessHabits?: () => void;
@@ -32,19 +38,33 @@ interface DailyHabit {
 
 export function Dashboard({
   userName = "Usuario",
+  dayStr,
+  habitCompletion,
+  onToggleHabit,
+  dailyChallengeCompleted,
+  onToggleDailyChallenge,
   onViewChallenge,
   onViewNutritionHabits,
   onViewFitnessHabits,
   onViewProfile,
 }: DashboardProps) {
-  const [habits, setHabits] = useState<DailyHabit[]>([
-    { id: "1", title: "Toma 2 vasos extra de agua", completed: true, category: "nutrition" },
-    { id: "2", title: "Come una porción de verduras", completed: false, category: "nutrition" },
-    { id: "3", title: "Camina 15 minutos", completed: true, category: "fitness" },
-    { id: "4", title: "Haz 5 estiramientos", completed: false, category: "fitness" },
-  ]);
+  // Derive dynamic daily habits based on the date seed
+  const { nutrition, fitness } = getDailyHabits(dayStr);
+  const habits: DailyHabit[] = [
+    ...nutrition.map((h) => ({
+      id: h.id,
+      title: h.title,
+      completed: !!habitCompletion[h.id],
+      category: h.category as "nutrition" | "fitness",
+    })),
+    ...fitness.map((h) => ({
+      id: h.id,
+      title: h.title,
+      completed: !!habitCompletion[h.id],
+      category: h.category as "nutrition" | "fitness",
+    })),
+  ];
 
-  const [dailyChallengeCompleted, setDailyChallengeCompleted] = useState(false);
   const [showCompletionMessage, setShowCompletionMessage] = useState(false);
   const [celebrationOpen, setCelebrationOpen] = useState(false);
   const [celebratedTitle, setCelebratedTitle] = useState<string | undefined>();
@@ -82,26 +102,22 @@ export function Dashboard({
   const fitnessPending = habits.filter((h) => h.category === "fitness" && !h.completed).length;
 
   const handleDailyChallengeToggle = () => {
-    setDailyChallengeCompleted(!dailyChallengeCompleted);
     if (!dailyChallengeCompleted) {
       setShowCompletionMessage(true);
       setTimeout(() => setShowCompletionMessage(false), 3000);
       setCelebratedTitle("Toma 2 vasos extra de agua y camina 15 minutos");
       setCelebrationOpen(true);
     }
+    onToggleDailyChallenge();
   };
 
   const toggleHabit = (id: string) => {
-    setHabits((prev) =>
-      prev.map((h) => {
-        if (h.id !== id) return h;
-        if (!h.completed) {
-          setCelebratedTitle(h.title);
-          setCelebrationOpen(true);
-        }
-        return { ...h, completed: !h.completed };
-      })
-    );
+    const habit = habits.find((h) => h.id === id);
+    if (habit && !habit.completed) {
+      setCelebratedTitle(habit.title);
+      setCelebrationOpen(true);
+    }
+    onToggleHabit(id);
   };
 
   return (
@@ -118,8 +134,6 @@ export function Dashboard({
         onClose={() => setWelcomeOpen(false)}
         userName={userName}
         onAcceptChallenge={onViewChallenge}
-        ctaLabel="Ver mi reto del día"
-        secondaryLabel="Ahora no"
       />
       {/* Header */}
       <header className="border-b border-border bg-card px-6 py-4">

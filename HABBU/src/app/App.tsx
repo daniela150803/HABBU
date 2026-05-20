@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { LandingPage } from "./components/LandingPage";
 import { Registration } from "./components/Registration";
 import { Login } from "./components/Login";
@@ -8,6 +8,17 @@ import { NutritionHabits } from "./components/NutritionHabits";
 import { FitnessHabits } from "./components/FitnessHabits";
 import { Profile } from "./components/Profile";
 import { PrivacyConsentModal } from "./components/PrivacyConsentModal";
+import {
+  getLocalDateString,
+  loadHabitCompletionState,
+  saveHabitCompletionState,
+  loadDailyChallengeCompleted,
+  saveDailyChallengeCompleted,
+  saveProgressToFirebase,
+  loadProgressFromFirebase
+} from "./components/habitsData";
+import { auth } from "./firebase";
+import { onAuthStateChanged } from "firebase/auth";
 
 type Screen =
   | "landing"
@@ -22,7 +33,81 @@ type Screen =
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>("landing");
   const [userName, setUserName] = useState("Usuario");
+  const [userEmail, setUserEmail] = useState("");
   const [needsPrivacyConsent, setNeedsPrivacyConsent] = useState(false);
+  const [dayStr, setDayStr] = useState(() => getLocalDateString());
+  const [habitCompletion, setHabitCompletion] = useState<Record<string, boolean>>({});
+  const [dailyChallengeCompleted, setDailyChallengeCompleted] = useState(false);
+
+  // Monitor Firebase Auth session state automatically (e.g. reload or state change)
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const displayName = user.displayName || (() => {
+          const inferred = user.email?.split("@")[0] || "Usuario";
+          return inferred.charAt(0).toUpperCase() + inferred.slice(1);
+        })();
+        setUserName(displayName);
+        setUserEmail(user.email || "");
+        setCurrentScreen("dashboard");
+      } else {
+        if (currentScreen !== "registration" && currentScreen !== "login") {
+          setCurrentScreen("landing");
+        }
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Sync completion states whenever user/email/screen changes
+  useEffect(() => {
+    const today = getLocalDateString();
+    setDayStr(today);
+    
+    // Load local storage first as local fast cache
+    const localHabits = loadHabitCompletionState(userName, today);
+    const localChallenge = loadDailyChallengeCompleted(userName, today);
+    setHabitCompletion(localHabits);
+    setDailyChallengeCompleted(localChallenge);
+
+    // If there is an active user email, pull progress from Firestore database
+    if (userEmail) {
+      loadProgressFromFirebase(userEmail, today).then((firebaseProgress) => {
+        if (firebaseProgress) {
+          setHabitCompletion(firebaseProgress.habitCompletion);
+          setDailyChallengeCompleted(firebaseProgress.dailyChallengeCompleted);
+          // Keep local storage in sync as local cache
+          saveHabitCompletionState(userName, today, firebaseProgress.habitCompletion);
+          saveDailyChallengeCompleted(userName, today, firebaseProgress.dailyChallengeCompleted);
+        } else {
+          // If no progress in Firestore yet, write the local progress to the cloud
+          saveProgressToFirebase(userEmail, today, userName, localHabits, localChallenge);
+        }
+      });
+    }
+  }, [userName, userEmail, currentScreen]);
+
+  const toggleHabit = (habitId: string) => {
+    setHabitCompletion((prev) => {
+      const next = { ...prev, [habitId]: !prev[habitId] };
+      saveHabitCompletionState(userName, dayStr, next);
+      if (userEmail) {
+        saveProgressToFirebase(userEmail, dayStr, userName, next, dailyChallengeCompleted);
+      }
+      return next;
+    });
+  };
+
+  const toggleDailyChallenge = () => {
+    setDailyChallengeCompleted((prev) => {
+      const next = !prev;
+      saveDailyChallengeCompleted(userName, dayStr, next);
+      if (userEmail) {
+        saveProgressToFirebase(userEmail, dayStr, userName, habitCompletion, next);
+      }
+      return next;
+    });
+  };
 
   const handleGetStarted = () => {
     setCurrentScreen("registration");
@@ -34,6 +119,7 @@ export default function App() {
 
   const handleAuthComplete = (userData: { name: string; email: string }) => {
     setUserName(userData.name);
+    setUserEmail(userData.email);
     setCurrentScreen("dashboard");
     console.log("Auth completed for", userData.email);
   };
@@ -84,15 +170,44 @@ export default function App() {
       {currentScreen === "dashboard" && (
         <Dashboard
           userName={userName}
+          dayStr={dayStr}
+          habitCompletion={habitCompletion}
+          onToggleHabit={toggleHabit}
+          dailyChallengeCompleted={dailyChallengeCompleted}
+          onToggleDailyChallenge={toggleDailyChallenge}
           onViewChallenge={handleViewDailyChallenge}
           onViewNutritionHabits={handleViewNutritionHabits}
           onViewFitnessHabits={handleViewFitnessHabits}
           onViewProfile={() => setCurrentScreen("profile")}
         />
       )}
-      {currentScreen === "daily-challenge" && <DailyChallenge onBack={handleBackToDashboard} />}
-      {currentScreen === "nutrition-habits" && <NutritionHabits onBack={handleBackToDashboard} />}
-      {currentScreen === "fitness-habits" && <FitnessHabits onBack={handleBackToDashboard} />}
+      {currentScreen === "daily-challenge" && (
+        <DailyChallenge
+          onBack={handleBackToDashboard}
+          userName={userName}
+          dayStr={dayStr}
+          isCompleted={dailyChallengeCompleted}
+          onToggleComplete={toggleDailyChallenge}
+        />
+      )}
+      {currentScreen === "nutrition-habits" && (
+        <NutritionHabits
+          onBack={handleBackToDashboard}
+          userName={userName}
+          dayStr={dayStr}
+          habitCompletion={habitCompletion}
+          onToggleHabit={toggleHabit}
+        />
+      )}
+      {currentScreen === "fitness-habits" && (
+        <FitnessHabits
+          onBack={handleBackToDashboard}
+          userName={userName}
+          dayStr={dayStr}
+          habitCompletion={habitCompletion}
+          onToggleHabit={toggleHabit}
+        />
+      )}
       {currentScreen === "profile" && (
         <Profile userName={userName} onBack={handleBackToDashboard} />
       )}

@@ -13,19 +13,32 @@ import {
 import { useState } from "react";
 import { HabbuMascot } from "./HabbuMascot";
 import { HabbuCelebrationModal } from "./HabbuCelebrationModal";
+import { getDailyHabits, loadHabitCompletionState } from "./habitsData";
 
 interface DailyChallengeProps {
   onBack: () => void;
-  completedCount?: number;
-  totalCount?: number;
+  userName: string;
+  dayStr: string;
+  isCompleted: boolean;
+  onToggleComplete: () => void;
 }
 
 export function DailyChallenge({
   onBack,
-  completedCount = 2,
-  totalCount = 4,
+  userName,
+  dayStr,
+  isCompleted,
+  onToggleComplete,
 }: DailyChallengeProps) {
-  const [isCompleted, setIsCompleted] = useState(false);
+  // Calculate completed habits count dynamically from localStorage completion state
+  const { nutrition, fitness } = getDailyHabits(dayStr);
+  const completionState = loadHabitCompletionState(userName, dayStr);
+  const totalCount = 4;
+  const completedCount = [
+    ...nutrition.map((h) => h.id),
+    ...fitness.map((h) => h.id),
+  ].filter((id) => completionState[id]).length;
+
   const [showCelebration, setShowCelebration] = useState(false);
   const [celebrationOpen, setCelebrationOpen] = useState(false);
 
@@ -40,10 +53,12 @@ export function DailyChallenge({
   ];
 
   const handleComplete = () => {
-    setIsCompleted(true);
-    setShowCelebration(true);
-    setCelebrationOpen(true);
-    setTimeout(() => setShowCelebration(false), 2000);
+    if (!isCompleted) {
+      setShowCelebration(true);
+      setCelebrationOpen(true);
+      setTimeout(() => setShowCelebration(false), 2000);
+    }
+    onToggleComplete();
   };
 
   const handleChangeChallenge = () => {
@@ -194,10 +209,9 @@ export function DailyChallenge({
                 onClick={handleComplete}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                disabled={isCompleted}
                 className={`flex flex-1 items-center justify-center gap-2 rounded-full px-8 py-4 shadow-lg transition-all ${
                   isCompleted
-                    ? "bg-primary text-primary-foreground"
+                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
                     : "bg-primary text-primary-foreground hover:bg-primary/90"
                 }`}
               >

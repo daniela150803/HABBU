@@ -17,10 +17,14 @@ import {
 import { useState } from "react";
 import { HabbuMascot } from "./HabbuMascot";
 import { HabbuCelebrationModal } from "./HabbuCelebrationModal";
-import tareasData from "../data/tareas.json";
+import { getDailyHabits } from "./habitsData";
 
 interface FitnessHabitsProps {
   onBack: () => void;
+  userName: string;
+  dayStr: string;
+  habitCompletion: Record<string, boolean>;
+  onToggleHabit: (habitId: string) => void;
 }
 
 interface Habit {
@@ -52,24 +56,24 @@ function getFitnessIcon(titulo: string) {
   return <Footprints className="h-6 w-6" />;
 }
 
-function getRandomFitnessTasks(): Habit[] {
-  const fitnessTasks = tareasData.tareas.filter(
-    (t) => t.categoria === "acondicionamiento_fisico"
-  );
-  const shuffled = [...fitnessTasks].sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, 2).map((t) => ({
-    id: String(t.id),
-    title: t.titulo,
-    description: t.descripcion,
-    estimatedTime: `${t.duracion_minutos} minutos`,
-    difficulty: t.duracion_minutos <= 8 ? "Fácil" : t.duracion_minutos <= 15 ? "Medio" : "Moderado",
-    completed: false,
-    icon: getFitnessIcon(t.titulo),
+export function FitnessHabits({
+  onBack,
+  userName,
+  dayStr,
+  habitCompletion,
+  onToggleHabit,
+}: FitnessHabitsProps) {
+  // Obtain dynamic fitness habits for the day
+  const { fitness } = getDailyHabits(dayStr);
+  const habits: Habit[] = fitness.map((h) => ({
+    id: h.id,
+    title: h.title,
+    description: h.description,
+    estimatedTime: h.estimatedTime,
+    difficulty: h.difficulty || "Fácil",
+    completed: !!habitCompletion[h.id],
+    icon: getFitnessIcon(h.title),
   }));
-}
-
-export function FitnessHabits({ onBack }: FitnessHabitsProps) {
-  const [habits, setHabits] = useState<Habit[]>(() => getRandomFitnessTasks());
 
   const [energyLevel, setEnergyLevel] = useState<EnergyLevel>(null);
   const [showCelebration, setShowCelebration] = useState(false);
@@ -90,20 +94,14 @@ export function FitnessHabits({ onBack }: FitnessHabitsProps) {
   const totalCount = habits.length;
 
   const toggleHabit = (id: string) => {
-    setHabits((prev) =>
-      prev.map((h) => {
-        if (h.id === id) {
-          if (!h.completed) {
-            setShowCelebration(true);
-            setTimeout(() => setShowCelebration(false), 1500);
-            setCelebratedHabitTitle(h.title);
-            setCelebrationOpen(true);
-          }
-          return { ...h, completed: !h.completed };
-        }
-        return h;
-      })
-    );
+    const habit = habits.find((h) => h.id === id);
+    if (habit && !habit.completed) {
+      setShowCelebration(true);
+      setTimeout(() => setShowCelebration(false), 1500);
+      setCelebratedHabitTitle(habit.title);
+      setCelebrationOpen(true);
+    }
+    onToggleHabit(id);
   };
 
   const getEnergyMessage = () => {
@@ -287,16 +285,6 @@ export function FitnessHabits({ onBack }: FitnessHabitsProps) {
                 </motion.div>
               ))}
             </div>
-
-            {/* View More Habits Button */}
-            <motion.button
-              onClick={() => setHabits(getRandomFitnessTasks())}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="mt-6 w-full rounded-full border-2 border-secondary px-6 py-3 text-secondary hover:bg-secondary/5"
-            >
-              Ver más hábitos
-            </motion.button>
           </section>
 
           {/* Sidebar */}
