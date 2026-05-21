@@ -10,15 +10,19 @@ import { Profile } from "./components/Profile";
 import { PrivacyConsentModal } from "./components/PrivacyConsentModal";
 import {
   getLocalDateString,
+  getDailyHabits,
+  getWeekDateStrings,
   loadHabitCompletionState,
   saveHabitCompletionState,
   loadDailyChallengeCompleted,
   saveDailyChallengeCompleted,
   saveProgressToFirebase,
-  loadProgressFromFirebase
+  loadProgressFromFirebase,
+  loadWeeklyProgressFromFirebase,
+  loadDetailedWeeklyProgressFromFirebase
 } from "./components/habitsData";
 import { auth } from "./firebase";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 
 type Screen =
   | "landing"
@@ -38,6 +42,9 @@ export default function App() {
   const [dayStr, setDayStr] = useState(() => getLocalDateString());
   const [habitCompletion, setHabitCompletion] = useState<Record<string, boolean>>({});
   const [dailyChallengeCompleted, setDailyChallengeCompleted] = useState(false);
+  const [weeklyCompletion, setWeeklyCompletion] = useState<Record<string, boolean>>({});
+  const [nutritionWeeklyCompletion, setNutritionWeeklyCompletion] = useState<Record<string, boolean>>({});
+  const [fitnessWeeklyCompletion, setFitnessWeeklyCompletion] = useState<Record<string, boolean>>({});
 
   // Monitor Firebase Auth session state automatically (e.g. reload or state change)
   useEffect(() => {
@@ -84,8 +91,31 @@ export default function App() {
           saveProgressToFirebase(userEmail, today, userName, localHabits, localChallenge);
         }
       });
+
+      // Load weekly completion data from Firebase
+      const weekDays = getWeekDateStrings(today);
+      loadDetailedWeeklyProgressFromFirebase(userEmail, weekDays).then((weeklyData) => {
+        setWeeklyCompletion(weeklyData.global);
+        setNutritionWeeklyCompletion(weeklyData.nutrition);
+        setFitnessWeeklyCompletion(weeklyData.fitness);
+      });
     }
   }, [userName, userEmail, currentScreen]);
+
+  // Update today's weekly completion status reactively when habits change
+  useEffect(() => {
+    const dailyHabits = getDailyHabits(dayStr);
+    
+    const nutIds = dailyHabits.nutrition.map((h) => h.id);
+    const fitIds = dailyHabits.fitness.map((h) => h.id);
+    
+    const isNutDone = nutIds.length > 0 && nutIds.every((id) => habitCompletion[id] === true);
+    const isFitDone = fitIds.length > 0 && fitIds.every((id) => habitCompletion[id] === true);
+    
+    setNutritionWeeklyCompletion((prev) => ({ ...prev, [dayStr]: isNutDone }));
+    setFitnessWeeklyCompletion((prev) => ({ ...prev, [dayStr]: isFitDone }));
+    setWeeklyCompletion((prev) => ({ ...prev, [dayStr]: isNutDone && isFitDone }));
+  }, [habitCompletion, dayStr]);
 
   const toggleHabit = (habitId: string) => {
     setHabitCompletion((prev) => {
@@ -107,6 +137,22 @@ export default function App() {
       }
       return next;
     });
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      setUserName("Usuario");
+      setUserEmail("");
+      setHabitCompletion({});
+      setDailyChallengeCompleted(false);
+      setWeeklyCompletion({});
+      setNutritionWeeklyCompletion({});
+      setFitnessWeeklyCompletion({});
+      setCurrentScreen("landing");
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
   };
 
   const handleGetStarted = () => {
@@ -179,6 +225,7 @@ export default function App() {
           onViewNutritionHabits={handleViewNutritionHabits}
           onViewFitnessHabits={handleViewFitnessHabits}
           onViewProfile={() => setCurrentScreen("profile")}
+          weeklyCompletion={weeklyCompletion}
         />
       )}
       {currentScreen === "daily-challenge" && (
@@ -197,6 +244,7 @@ export default function App() {
           dayStr={dayStr}
           habitCompletion={habitCompletion}
           onToggleHabit={toggleHabit}
+          weeklyCompletion={nutritionWeeklyCompletion}
         />
       )}
       {currentScreen === "fitness-habits" && (
@@ -206,10 +254,11 @@ export default function App() {
           dayStr={dayStr}
           habitCompletion={habitCompletion}
           onToggleHabit={toggleHabit}
+          weeklyCompletion={fitnessWeeklyCompletion}
         />
       )}
       {currentScreen === "profile" && (
-        <Profile userName={userName} onBack={handleBackToDashboard} />
+        <Profile userName={userName} onBack={handleBackToDashboard} onSignOut={handleSignOut} />
       )}
       <PrivacyConsentModal
         open={needsPrivacyConsent}
