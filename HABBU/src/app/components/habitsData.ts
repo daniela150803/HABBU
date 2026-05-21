@@ -248,6 +248,108 @@ export async function loadProgressFromFirebase(
   return null;
 }
 
+// Get date strings for current week (Monday to Sunday)
+export function getWeekDateStrings(todayStr: string): string[] {
+  const today = new Date(todayStr + "T12:00:00");
+  const dayOfWeek = today.getDay(); // 0=Sun, 1=Mon, ...
+  const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+  const monday = new Date(today);
+  monday.setDate(today.getDate() + mondayOffset);
+
+  const days: string[] = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    days.push(`${year}-${month}-${day}`);
+  }
+  return days;
+}
+
+// Load weekly completion status from Firebase (a day is complete if all 4 habits are done)
+export async function loadWeeklyProgressFromFirebase(
+  userEmail: string,
+  weekDays: string[]
+): Promise<Record<string, boolean>> {
+  const result: Record<string, boolean> = {};
+  if (!userEmail) return result;
+
+  for (const dayStr of weekDays) {
+    try {
+      const docRef = doc(db, "progress", `${userEmail}_${dayStr}`);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        const habitCompletion = data.habitCompletion || {};
+        const dailyHabits = getDailyHabits(dayStr);
+        const allHabitIds = [
+          ...dailyHabits.nutrition.map((h) => h.id),
+          ...dailyHabits.fitness.map((h) => h.id),
+        ];
+        result[dayStr] = allHabitIds.every((id) => habitCompletion[id] === true);
+      } else {
+        result[dayStr] = false;
+      }
+    } catch {
+      result[dayStr] = false;
+    }
+  }
+  return result;
+}
+
+export interface DetailedWeeklyProgress {
+  global: Record<string, boolean>;
+  nutrition: Record<string, boolean>;
+  fitness: Record<string, boolean>;
+}
+
+export async function loadDetailedWeeklyProgressFromFirebase(
+  userEmail: string,
+  weekDays: string[]
+): Promise<DetailedWeeklyProgress> {
+  const global: Record<string, boolean> = {};
+  const nutrition: Record<string, boolean> = {};
+  const fitness: Record<string, boolean> = {};
+
+  if (!userEmail) {
+    return { global, nutrition, fitness };
+  }
+
+  for (const dayStr of weekDays) {
+    try {
+      const docRef = doc(db, "progress", `${userEmail}_${dayStr}`);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        const habitCompletion = data.habitCompletion || {};
+        const dailyHabits = getDailyHabits(dayStr);
+
+        const nutIds = dailyHabits.nutrition.map((h) => h.id);
+        const fitIds = dailyHabits.fitness.map((h) => h.id);
+
+        const isNutDone = nutIds.length > 0 && nutIds.every((id) => habitCompletion[id] === true);
+        const isFitDone = fitIds.length > 0 && fitIds.every((id) => habitCompletion[id] === true);
+
+        nutrition[dayStr] = isNutDone;
+        fitness[dayStr] = isFitDone;
+        global[dayStr] = isNutDone && isFitDone;
+      } else {
+        nutrition[dayStr] = false;
+        fitness[dayStr] = false;
+        global[dayStr] = false;
+      }
+    } catch {
+      nutrition[dayStr] = false;
+      fitness[dayStr] = false;
+      global[dayStr] = false;
+    }
+  }
+
+  return { global, nutrition, fitness };
+}
+
 export interface DailyChallengeData {
   id: number;
   categoria: string;

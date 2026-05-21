@@ -15,6 +15,7 @@ import {
   PartyPopper,
   Smile,
   HeartPulse,
+  LogOut,
 } from "lucide-react";
 import {
   HabbuMascot,
@@ -26,9 +27,10 @@ import {
 interface ProfileProps {
   userName: string;
   onBack: () => void;
+  onSignOut?: () => void;
 }
 
-export function Profile({ userName, onBack }: ProfileProps) {
+export function Profile({ userName, onBack, onSignOut }: ProfileProps) {
   // Soft, non-competitive progress signal (0-1) — used only to choose the
   // panda's expression and tone of message, NOT to count days or streaks.
   const overallProgress = 0.6;
@@ -160,6 +162,16 @@ export function Profile({ userName, onBack }: ProfileProps) {
           <h2 className="text-lg text-foreground">Mi perfil</h2>
 
           <div className="flex items-center gap-2">
+            {onSignOut && (
+              <button
+                onClick={onSignOut}
+                title="Cerrar sesión"
+                aria-label="Cerrar sesión"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
+              >
+                <LogOut className="h-5 w-5" />
+              </button>
+            )}
             <button
               aria-label="Notificaciones"
               className="flex h-10 w-10 items-center justify-center rounded-full bg-muted hover:bg-muted/80"
@@ -368,6 +380,18 @@ export function Profile({ userName, onBack }: ProfileProps) {
               <span className="text-foreground">Habbu 🐼</span>
             </div>
           </div>
+
+          {onSignOut && (
+            <motion.button
+              onClick={onSignOut}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="mt-5 flex w-full items-center justify-center gap-2 rounded-full border-2 border-destructive/30 bg-destructive/10 px-6 py-3.5 text-destructive transition-all hover:bg-destructive/20"
+            >
+              <LogOut className="h-4 w-4" />
+              Cerrar sesión
+            </motion.button>
+          )}
         </motion.section>
       </main>
     </div>

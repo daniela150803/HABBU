@@ -14,7 +14,7 @@ import habbuDashImg from "../../imports/10.png";
 import habbuIconImg from "../../imports/3-2.png";
 import { HabbuCelebrationModal } from "./HabbuCelebrationModal";
 import { HabbuWelcomeModal } from "./HabbuWelcomeModal";
-import { getDailyHabits, getDailyChallengeForDay } from "./habitsData";
+import { getDailyHabits, getDailyChallengeForDay, getWeekDateStrings } from "./habitsData";
 
 interface DashboardProps {
   userName: string;
@@ -28,6 +28,7 @@ interface DashboardProps {
   onViewFitnessHabits?: () => void;
   onViewProfile?: () => void;
   userInterests?: string[];
+  weeklyCompletion?: Record<string, boolean>;
 }
 
 interface DailyHabit {
@@ -49,6 +50,7 @@ export function Dashboard({
   onViewFitnessHabits,
   onViewProfile,
   userInterests,
+  weeklyCompletion = {},
 }: DashboardProps) {
   // Derive dynamic daily habits based on the date seed
   const { nutrition, fitness } = getDailyHabits(dayStr);
@@ -87,15 +89,13 @@ export function Dashboard({
     }
   }, []);
 
-  const weekData = [
-    { day: "L", completed: true },
-    { day: "M", completed: true },
-    { day: "X", completed: false },
-    { day: "J", completed: true },
-    { day: "V", completed: false },
-    { day: "S", completed: false },
-    { day: "D", completed: false, isToday: true },
-  ];
+  const DAY_LABELS = ["L", "M", "X", "J", "V", "S", "D"];
+  const weekDays = getWeekDateStrings(dayStr);
+  const weekData = weekDays.map((dateStr, i) => ({
+    day: DAY_LABELS[i],
+    completed: !!weeklyCompletion[dateStr],
+    isToday: dateStr === dayStr,
+  }));
 
   const completedCount = habits.filter((h) => h.completed).length;
   const totalCount = habits.length;
@@ -401,17 +401,20 @@ export function Dashboard({
                   <motion.div
                     whileHover={{ scale: 1.1 }}
                     className={`flex h-12 w-12 items-center justify-center rounded-full transition-colors ${
-                      day.isToday
-                        ? "border-2 border-primary bg-primary/10"
-                        : day.completed
-                          ? "bg-primary"
-                          : "bg-muted"
+                      day.completed
+                        ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20"
+                        : day.isToday
+                          ? "border-2 border-primary bg-primary/10 text-primary"
+                          : "bg-muted text-muted-foreground"
                     }`}
                   >
-                    {day.completed && !day.isToday && (
-                      <CheckCircle2 className="h-5 w-5 text-primary-foreground" />
+                    {day.completed ? (
+                      <CheckCircle2 className="h-5 w-5" />
+                    ) : day.isToday ? (
+                      <Circle className="h-5 w-5" />
+                    ) : (
+                      <Circle className="h-5 w-5 opacity-25" />
                     )}
-                    {day.isToday && <Circle className="h-5 w-5 text-primary" />}
                   </motion.div>
                 </div>
               ))}
