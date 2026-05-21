@@ -27,6 +27,7 @@ interface DashboardProps {
   onViewNutritionHabits?: () => void;
   onViewFitnessHabits?: () => void;
   onViewProfile?: () => void;
+  userInterests?: string[];
 }
 
 interface DailyHabit {
@@ -47,10 +48,11 @@ export function Dashboard({
   onViewNutritionHabits,
   onViewFitnessHabits,
   onViewProfile,
+  userInterests,
 }: DashboardProps) {
   // Derive dynamic daily habits based on the date seed
   const { nutrition, fitness } = getDailyHabits(dayStr);
-  const dailyChallenge = getDailyChallengeForDay(dayStr);
+  const dailyChallenge = getDailyChallengeForDay(dayStr, userInterests);
   const habits: DailyHabit[] = [
     ...nutrition.map((h) => ({
       id: h.id,

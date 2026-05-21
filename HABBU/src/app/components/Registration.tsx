@@ -5,9 +5,10 @@ import habbuRegImg from "../../imports/5.png";
 import habbuIconImg from "../../imports/3.png";
 import { auth } from "../firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { saveUserPreferences } from "./habitsData";
 
 interface RegistrationProps {
-  onComplete: (userData: { name: string; email: string }) => void;
+  onComplete: (userData: { name: string; email: string; interests?: string[] }) => void;
   onBack?: () => void;
   onGoToLogin?: () => void;
 }
@@ -21,7 +22,7 @@ export function Registration({ onComplete, onBack, onGoToLogin }: RegistrationPr
     gender: "",
     goals: [] as string[],
     timeCommitment: "",
-    interest: "",
+    interests: [] as string[],
     dailyChallenge: true,
   });
 
@@ -43,6 +44,17 @@ export function Registration({ onComplete, onBack, onGoToLogin }: RegistrationPr
         ? prev.goals.filter((g) => g !== goalId)
         : [...prev.goals, goalId],
     }));
+  };
+
+  const toggleInterest = (interestId: string) => {
+    setFormData((prev) => {
+      const exists = prev.interests.includes(interestId);
+      const updated = exists
+        ? prev.interests.filter((i) => i !== interestId)
+        : [...prev.interests, interestId];
+      return { ...prev, interests: updated };
+    });
+    setErrors((prev) => ({ ...prev, interests: "" }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -68,8 +80,8 @@ export function Registration({ onComplete, onBack, onGoToLogin }: RegistrationPr
     if (!formData.timeCommitment) {
       newErrors.timeCommitment = "Selecciona cuánto tiempo puedes dedicar";
     }
-    if (!formData.interest) {
-      newErrors.interest = "Selecciona tu interés principal";
+    if (formData.interests.length === 0) {
+      newErrors.interests = "Selecciona al menos un interés";
     }
 
     setErrors(newErrors);
@@ -86,8 +98,19 @@ export function Registration({ onComplete, onBack, onGoToLogin }: RegistrationPr
             displayName: formData.name.trim()
           });
         }
+        await saveUserPreferences(formData.email.trim(), {
+          interests: formData.interests,
+          goals: formData.goals,
+          age: formData.age,
+          gender: formData.gender,
+          timeCommitment: formData.timeCommitment,
+        });
         console.log("Registration data:", formData);
-        onComplete({ name: formData.name.trim(), email: formData.email.trim() });
+        onComplete({
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          interests: formData.interests,
+        });
       } catch (error: any) {
         console.error("Firebase registration error:", error);
         let errorMsg = "Ocurrió un error al registrar el usuario";
@@ -108,7 +131,7 @@ export function Registration({ onComplete, onBack, onGoToLogin }: RegistrationPr
     formData.age !== "",
     formData.goals.length > 0,
     formData.timeCommitment !== "",
-    formData.interest !== "",
+    formData.interests.length > 0,
   ].filter(Boolean).length;
 
   return (
@@ -346,25 +369,27 @@ export function Registration({ onComplete, onBack, onGoToLogin }: RegistrationPr
 
                 {/* Interest */}
                 <div>
-                  <label className="mb-3 block text-foreground">¿Qué te interesa más?</label>
+                  <label className="mb-3 block text-foreground">¿Qué te interesa? (Puedes elegir ambos)</label>
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <motion.button
                       type="button"
-                      onClick={() => {
-                        setFormData({ ...formData, interest: "nutrition" });
-                        setErrors({ ...errors, interest: "" });
-                      }}
+                      onClick={() => toggleInterest("nutrition")}
                       whileHover={{ scale: 1.03, y: -4 }}
                       whileTap={{ scale: 0.98 }}
-                      className={`rounded-2xl border-2 p-6 text-left transition-all ${
-                        formData.interest === "nutrition"
+                      className={`relative rounded-2xl border-2 p-6 text-left transition-all ${
+                        formData.interests.includes("nutrition")
                           ? "border-primary bg-primary/10 shadow-lg"
                           : "border-border bg-input-background hover:border-primary/50 hover:shadow-md"
                       }`}
                     >
+                      {formData.interests.includes("nutrition") && (
+                        <div className="absolute right-4 top-4 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                          <Check className="h-4 w-4" />
+                        </div>
+                      )}
                       <div className="mb-3 text-2xl">🥗</div>
                       <h3
-                        className={`mb-2 ${formData.interest === "nutrition" ? "text-primary" : "text-foreground"}`}
+                        className={`mb-2 ${formData.interests.includes("nutrition") ? "text-primary" : "text-foreground"}`}
                       >
                         Alimentación saludable
                       </h3>
@@ -375,21 +400,23 @@ export function Registration({ onComplete, onBack, onGoToLogin }: RegistrationPr
 
                     <motion.button
                       type="button"
-                      onClick={() => {
-                        setFormData({ ...formData, interest: "fitness" });
-                        setErrors({ ...errors, interest: "" });
-                      }}
+                      onClick={() => toggleInterest("fitness")}
                       whileHover={{ scale: 1.03, y: -4 }}
                       whileTap={{ scale: 0.98 }}
-                      className={`rounded-2xl border-2 p-6 text-left transition-all ${
-                        formData.interest === "fitness"
+                      className={`relative rounded-2xl border-2 p-6 text-left transition-all ${
+                        formData.interests.includes("fitness")
                           ? "border-primary bg-primary/10 shadow-lg"
                           : "border-border bg-input-background hover:border-primary/50 hover:shadow-md"
                       }`}
                     >
+                      {formData.interests.includes("fitness") && (
+                        <div className="absolute right-4 top-4 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                          <Check className="h-4 w-4" />
+                        </div>
+                      )}
                       <div className="mb-3 text-2xl">💪</div>
                       <h3
-                        className={`mb-2 ${formData.interest === "fitness" ? "text-primary" : "text-foreground"}`}
+                        className={`mb-2 ${formData.interests.includes("fitness") ? "text-primary" : "text-foreground"}`}
                       >
                         Acondicionamiento físico
                       </h3>
@@ -398,7 +425,7 @@ export function Registration({ onComplete, onBack, onGoToLogin }: RegistrationPr
                       </p>
                     </motion.button>
                   </div>
-                  {errors.interest && <p className="mt-1 text-sm text-destructive">{errors.interest}</p>}
+                  {errors.interests && <p className="mt-1 text-sm text-destructive">{errors.interests}</p>}
                 </div>
 
                 {/* Daily Challenge Checkbox */}

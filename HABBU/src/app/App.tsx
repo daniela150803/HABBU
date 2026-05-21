@@ -15,7 +15,8 @@ import {
   loadDailyChallengeCompleted,
   saveDailyChallengeCompleted,
   saveProgressToFirebase,
-  loadProgressFromFirebase
+  loadProgressFromFirebase,
+  loadUserPreferences
 } from "./components/habitsData";
 import { auth } from "./firebase";
 import { onAuthStateChanged } from "firebase/auth";
@@ -38,6 +39,7 @@ export default function App() {
   const [dayStr, setDayStr] = useState(() => getLocalDateString());
   const [habitCompletion, setHabitCompletion] = useState<Record<string, boolean>>({});
   const [dailyChallengeCompleted, setDailyChallengeCompleted] = useState(false);
+  const [userInterests, setUserInterests] = useState<string[]>([]);
 
   // Monitor Firebase Auth session state automatically (e.g. reload or state change)
   useEffect(() => {
@@ -49,6 +51,13 @@ export default function App() {
         })();
         setUserName(displayName);
         setUserEmail(user.email || "");
+        if (user.email) {
+          loadUserPreferences(user.email).then((prefs) => {
+            if (prefs) {
+              setUserInterests(prefs.interests);
+            }
+          });
+        }
         setCurrentScreen("dashboard");
       } else {
         if (currentScreen !== "registration" && currentScreen !== "login") {
@@ -72,6 +81,11 @@ export default function App() {
 
     // If there is an active user email, pull progress from Firestore database
     if (userEmail) {
+      loadUserPreferences(userEmail).then((prefs) => {
+        if (prefs) {
+          setUserInterests(prefs.interests);
+        }
+      });
       loadProgressFromFirebase(userEmail, today).then((firebaseProgress) => {
         if (firebaseProgress) {
           setHabitCompletion(firebaseProgress.habitCompletion);
@@ -117,14 +131,23 @@ export default function App() {
     setCurrentScreen("login");
   };
 
-  const handleAuthComplete = (userData: { name: string; email: string }) => {
+  const handleAuthComplete = (userData: { name: string; email: string; interests?: string[] }) => {
     setUserName(userData.name);
     setUserEmail(userData.email);
+    if (userData.interests) {
+      setUserInterests(userData.interests);
+    } else if (userData.email) {
+      loadUserPreferences(userData.email).then((prefs) => {
+        if (prefs) {
+          setUserInterests(prefs.interests);
+        }
+      });
+    }
     setCurrentScreen("dashboard");
     console.log("Auth completed for", userData.email);
   };
 
-  const handleRegistrationComplete = (userData: { name: string; email: string }) => {
+  const handleRegistrationComplete = (userData: { name: string; email: string; interests?: string[] }) => {
     handleAuthComplete(userData);
     setNeedsPrivacyConsent(true);
   };
@@ -179,6 +202,7 @@ export default function App() {
           onViewNutritionHabits={handleViewNutritionHabits}
           onViewFitnessHabits={handleViewFitnessHabits}
           onViewProfile={() => setCurrentScreen("profile")}
+          userInterests={userInterests}
         />
       )}
       {currentScreen === "daily-challenge" && (
@@ -188,6 +212,7 @@ export default function App() {
           dayStr={dayStr}
           isCompleted={dailyChallengeCompleted}
           onToggleComplete={toggleDailyChallenge}
+          userInterests={userInterests}
         />
       )}
       {currentScreen === "nutrition-habits" && (

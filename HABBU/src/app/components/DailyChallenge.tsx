@@ -23,6 +23,7 @@ interface DailyChallengeProps {
   dayStr: string;
   isCompleted: boolean;
   onToggleComplete: () => void;
+  userInterests?: string[];
 }
 
 export function DailyChallenge({
@@ -31,6 +32,7 @@ export function DailyChallenge({
   dayStr,
   isCompleted,
   onToggleComplete,
+  userInterests,
 }: DailyChallengeProps) {
   // Calculate completed habits count dynamically from localStorage completion state
   const { nutrition, fitness } = getDailyHabits(dayStr);
@@ -44,7 +46,7 @@ export function DailyChallenge({
   const [showCelebration, setShowCelebration] = useState(false);
   const [celebrationOpen, setCelebrationOpen] = useState(false);
 
-  const dailyChallenge = getDailyChallengeForDay(dayStr);
+  const dailyChallenge = getDailyChallengeForDay(dayStr, userInterests);
   const isNutrition = dailyChallenge.categoria === "alimentacion saludable";
   const ChallengeIcon = isNutrition ? (dailyChallenge.titulo.toLowerCase().includes("agua") ? Droplet : Apple) : Activity;
 

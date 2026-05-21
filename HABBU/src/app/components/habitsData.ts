@@ -258,14 +258,67 @@ export interface DailyChallengeData {
   pasos: string[];
 }
 
-export function getDailyChallengeForDay(dayStr: string): DailyChallengeData {
+export function getDailyChallengeForDay(dayStr: string, interests?: string[]): DailyChallengeData {
   let seed = 0;
   for (let i = 0; i < dayStr.length; i++) {
     seed += dayStr.charCodeAt(i);
   }
-  const list = retosData.retos;
+  let list = retosData.retos;
+  if (interests && interests.length > 0) {
+    list = list.filter((r) => {
+      const cat = r.categoria === "alimentacion saludable" ? "nutrition" : "fitness";
+      return interests.includes(cat);
+    });
+  }
+  if (list.length === 0) {
+    list = retosData.retos;
+  }
   const index = seed % list.length;
   return list[index];
+}
+
+export interface UserPreferences {
+  interests: string[];
+  goals: string[];
+  age: string;
+  gender: string;
+  timeCommitment: string;
+}
+
+export async function saveUserPreferences(
+  userEmail: string,
+  preferences: UserPreferences
+): Promise<void> {
+  if (!userEmail) return;
+  try {
+    const docRef = doc(db, "users", userEmail);
+    await setDoc(docRef, preferences, { merge: true });
+  } catch (error) {
+    console.error("Error saving user preferences to Firebase:", error);
+  }
+}
+
+export async function loadUserPreferences(
+  userEmail: string
+): Promise<UserPreferences | null> {
+  if (!userEmail) return null;
+  try {
+    const docRef = doc(db, "users", userEmail);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      return {
+        interests: data.interests || [],
+        goals: data.goals || [],
+        age: data.age || "",
+        gender: data.gender || "",
+        timeCommitment: data.timeCommitment || "",
+      };
+    }
+  } catch (error) {
+    console.error("Error loading user preferences from Firebase:", error);
+  }
+  return null;
 }
 
 
