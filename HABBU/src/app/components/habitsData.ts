@@ -2,6 +2,8 @@
 // Pools of activities and helper functions for date-based deterministic selection and persistence.
 import { db } from "../firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
+import retosData from "../data/retos_diarios.json";
+
 
 export interface HabitData {
   id: string;
@@ -245,4 +247,25 @@ export async function loadProgressFromFirebase(
   }
   return null;
 }
+
+export interface DailyChallengeData {
+  id: number;
+  categoria: string;
+  titulo: string;
+  descripcion: string;
+  tiempo: string;
+  dificultad: string;
+  pasos: string[];
+}
+
+export function getDailyChallengeForDay(dayStr: string): DailyChallengeData {
+  let seed = 0;
+  for (let i = 0; i < dayStr.length; i++) {
+    seed += dayStr.charCodeAt(i);
+  }
+  const list = retosData.retos;
+  const index = seed % list.length;
+  return list[index];
+}
+
 

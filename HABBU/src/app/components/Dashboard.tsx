@@ -14,7 +14,7 @@ import habbuDashImg from "../../imports/10.png";
 import habbuIconImg from "../../imports/3-2.png";
 import { HabbuCelebrationModal } from "./HabbuCelebrationModal";
 import { HabbuWelcomeModal } from "./HabbuWelcomeModal";
-import { getDailyHabits } from "./habitsData";
+import { getDailyHabits, getDailyChallengeForDay } from "./habitsData";
 
 interface DashboardProps {
   userName: string;
@@ -50,6 +50,7 @@ export function Dashboard({
 }: DashboardProps) {
   // Derive dynamic daily habits based on the date seed
   const { nutrition, fitness } = getDailyHabits(dayStr);
+  const dailyChallenge = getDailyChallengeForDay(dayStr);
   const habits: DailyHabit[] = [
     ...nutrition.map((h) => ({
       id: h.id,
@@ -343,10 +344,9 @@ export function Dashboard({
             <div className="mb-4 inline-block rounded-full bg-primary/20 px-4 py-2 text-sm text-primary">
               Reto del día
             </div>
-            <h2 className="mb-4 text-foreground">Toma 2 vasos extra de agua y camina 15 minutos</h2>
+            <h2 className="mb-4 text-foreground">{dailyChallenge.titulo}</h2>
             <p className="mb-6 text-muted-foreground">
-              Pequeños pasos que hacen una gran diferencia. Hidratarte bien y moverte un poco más te
-              ayudará a sentirte con más energía durante todo el día.
+              {dailyChallenge.descripcion}
             </p>
 
             <motion.button

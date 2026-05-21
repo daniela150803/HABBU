@@ -9,11 +9,13 @@ import {
   Circle,
   Sparkles,
   Flame,
+  Apple,
+  Activity,
 } from "lucide-react";
 import { useState } from "react";
 import { HabbuMascot } from "./HabbuMascot";
 import { HabbuCelebrationModal } from "./HabbuCelebrationModal";
-import { getDailyHabits, loadHabitCompletionState } from "./habitsData";
+import { getDailyHabits, loadHabitCompletionState, getDailyChallengeForDay } from "./habitsData";
 
 interface DailyChallengeProps {
   onBack: () => void;
@@ -41,6 +43,10 @@ export function DailyChallenge({
 
   const [showCelebration, setShowCelebration] = useState(false);
   const [celebrationOpen, setCelebrationOpen] = useState(false);
+
+  const dailyChallenge = getDailyChallengeForDay(dayStr);
+  const isNutrition = dailyChallenge.categoria === "alimentacion saludable";
+  const ChallengeIcon = isNutrition ? (dailyChallenge.titulo.toLowerCase().includes("agua") ? Droplet : Apple) : Activity;
 
   const weekProgress = [
     { day: "L", completed: true },
@@ -72,7 +78,7 @@ export function DailyChallenge({
         open={celebrationOpen}
         onClose={() => setCelebrationOpen(false)}
         variant="challenge"
-        habitTitle="Toma 2 vasos extra de agua"
+        habitTitle={dailyChallenge.titulo}
       />
       {/* Header */}
       <header className="border-b border-border bg-card px-6 py-4">
@@ -148,21 +154,20 @@ export function DailyChallenge({
             }`}
           >
             {/* Category Badge */}
-            <div className="mb-4 inline-block rounded-full bg-primary/10 px-4 py-2 text-sm text-primary">
-              Alimentación saludable
+            <div className="mb-4 inline-block rounded-full bg-primary/10 px-4 py-2 text-sm text-primary capitalize">
+              {dailyChallenge.categoria}
             </div>
 
             {/* Challenge Title */}
             <div className="mb-6 flex items-start justify-between gap-4">
               <div className="flex-1">
-                <h1 className="mb-3 text-foreground">Toma 2 vasos extra de agua</h1>
+                <h1 className="mb-3 text-foreground">{dailyChallenge.titulo}</h1>
                 <p className="text-muted-foreground">
-                  Mantenerte hidratado mejora tu concentración, energía y ayuda a tu digestión. El agua
-                  también puede reducir antojos de comida.
+                  {dailyChallenge.descripcion}
                 </p>
               </div>
               <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl bg-primary/10">
-                <Droplet className="h-8 w-8 text-primary" />
+                <ChallengeIcon className="h-8 w-8 text-primary" />
               </div>
             </div>
 
@@ -170,11 +175,11 @@ export function DailyChallenge({
             <div className="mb-6 flex flex-wrap gap-4">
               <div className="flex items-center gap-2 rounded-xl bg-muted px-4 py-2">
                 <Clock className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm text-foreground">5 minutos</span>
+                <span className="text-sm text-foreground">{dailyChallenge.tiempo}</span>
               </div>
               <div className="flex items-center gap-2 rounded-xl bg-muted px-4 py-2">
                 <Zap className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm text-foreground">Fácil</span>
+                <span className="text-sm text-foreground">{dailyChallenge.dificultad}</span>
               </div>
             </div>
 
@@ -182,24 +187,14 @@ export function DailyChallenge({
             <div className="mb-6 rounded-2xl bg-muted/50 p-6">
               <h3 className="mb-4 text-foreground">Cómo hacerlo</h3>
               <div className="space-y-3">
-                <div className="flex items-start gap-3">
-                  <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
-                    1
+                {dailyChallenge.pasos.map((paso, idx) => (
+                  <div key={idx} className="flex items-start gap-3">
+                    <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
+                      {idx + 1}
+                    </div>
+                    <p className="text-foreground">{paso}</p>
                   </div>
-                  <p className="text-foreground">Lleva una botella o vaso contigo</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
-                    2
-                  </div>
-                  <p className="text-foreground">Toma un vaso de agua antes del almuerzo</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
-                    3
-                  </div>
-                  <p className="text-foreground">Toma otro antes de terminar el día</p>
-                </div>
+                ))}
               </div>
             </div>
 
@@ -227,17 +222,6 @@ export function DailyChallenge({
                   </>
                 )}
               </motion.button>
-
-              {!isCompleted && (
-                <motion.button
-                  onClick={handleChangeChallenge}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="rounded-full border-2 border-primary px-8 py-4 text-primary hover:bg-primary/5"
-                >
-                  Cambiar reto
-                </motion.button>
-              )}
             </div>
           </div>
         </motion.section>

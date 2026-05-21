@@ -1,0 +1,134 @@
+{
+  "retos": [
+    {
+      "id": 1,
+      "categoria": "alimentacion saludable",
+      "titulo": "Toma 2 vasos extra de agua",
+      "descripcion": "Mantenerte hidratado mejora tu concentración, energía y ayuda a tu digestión. El agua también puede reducir antojos de comida.",
+      "tiempo": "5 minutos",
+      "dificultad": "Fácil",
+      "pasos": [
+        "Lleva una botella o vaso contigo",
+        "Toma un vaso de agua antes del almuerzo",
+        "Toma otro antes de terminar el día"
+      ]
+    },
+    {
+      "id": 2,
+      "categoria": "alimentacion saludable",
+      "titulo": "Come un snack a base de frutas",
+      "descripcion": "Reemplaza los snacks procesados y azucarados por una deliciosa porción de fruta fresca para aportar vitaminas y fibra natural a tu cuerpo.",
+      "tiempo": "5 minutos",
+      "dificultad": "Fácil",
+      "pasos": [
+        "Elige tu fruta favorita (manzana, plátano, mandarina)",
+        "Lávala y córtala en porciones manejables",
+        "Disfrútala a media tarde en lugar de golosinas"
+      ]
+    },
+    {
+      "id": 3,
+      "categoria": "alimentacion saludable",
+      "titulo": "Reemplaza una bebida azucarada",
+      "descripcion": "Evitar el azúcar líquido es una de las formas más efectivas de cuidar tu salud metabólica y evitar picos de fatiga durante el día.",
+      "tiempo": "5 minutos",
+      "dificultad": "Medio",
+      "pasos": [
+        "Identifica una bebida con azúcar que consumas habitualmente",
+        "Sustitúyela hoy por agua con gas, infusión o agua con limón",
+        "Nota cómo se estabiliza tu energía por la tarde"
+      ]
+    },
+    {
+      "id": 4,
+      "categoria": "alimentacion saludable",
+      "titulo": "Suma una porción de verduras",
+      "descripcion": "Las verduras aportan nutrientes esenciales y fibra que mejora tu salud digestiva y te mantiene saciado por más tiempo.",
+      "tiempo": "10 minutos",
+      "dificultad": "Fácil",
+      "pasos": [
+        "Elige una verdura verde como espinaca, brócoli o lechuga",
+        "Prepárala cocida al vapor o en ensalada fresca",
+        "Súmala a tu almuerzo o cena como acompañamiento principal"
+      ]
+    },
+    {
+      "id": 5,
+      "categoria": "alimentacion saludable",
+      "titulo": "Desayuna sin azúcares añadidos",
+      "descripcion": "Iniciar el día con energía estable y sin azúcares refinados evita los bajones de productividad a media mañana.",
+      "tiempo": "15 minutos",
+      "dificultad": "Moderado",
+      "pasos": [
+        "Elige una base de avena integral, yogur natural o huevos",
+        "Endulza únicamente con trozos de fruta entera si es necesario",
+        "Acompaña con té o café sin añadir endulzantes"
+      ]
+    },
+    {
+      "id": 6,
+      "categoria": "acondicionamiento fisico",
+      "titulo": "Camina 15 minutos continuos",
+      "descripcion": "Una caminata ligera mejora la circulación, despeja la mente y te ayuda a cumplir con un nivel mínimo de actividad física diaria.",
+      "tiempo": "15 minutos",
+      "dificultad": "Fácil",
+      "pasos": [
+        "Ponte calzado cómodo y ropa ligera",
+        "Camina a paso constante por tu vecindario o parque cercano",
+        "Mantén una postura erguida y respira rítmicamente"
+      ]
+    },
+    {
+      "id": 7,
+      "categoria": "acondicionamiento fisico",
+      "titulo": "Realiza estiramientos matutinos",
+      "descripcion": "Estirar los músculos al despertar reduce la rigidez, mejora la flexibilidad y prepara tu cuerpo para el movimiento del día.",
+      "tiempo": "10 minutos",
+      "dificultad": "Fácil",
+      "pasos": [
+        "Estira los brazos hacia el techo inhalando profundo",
+        "Rota suavemente el cuello y los hombros para liberar tensión",
+        "Flexiona el torso intentando tocar las puntas de tus pies"
+      ]
+    },
+    {
+      "id": 8,
+      "categoria": "acondicionamiento fisico",
+      "titulo": "Sube escaleras en vez de ascensor",
+      "descripcion": "Subir escaleras es un excelente ejercicio cardiovascular que fortalece tus piernas y glúteos de manera rápida.",
+      "tiempo": "5 minutos",
+      "dificultad": "Medio",
+      "pasos": [
+        "Identifica tus trayectos cotidianos que tengan escaleras",
+        "Elige subir a pie en lugar de usar ascensor o rampas mecánicas",
+        "Sube a un ritmo constante enfocándote en empujar con tus talones"
+      ]
+    },
+    {
+      "id": 9,
+      "categoria": "acondicionamiento fisico",
+      "titulo": "Completa 15 sentadillas lentas",
+      "descripcion": "Las sentadillas fortalecen el tren inferior del cuerpo y mejoran la estabilidad articular en caderas y rodillas.",
+      "tiempo": "5 minutos",
+      "dificultad": "Medio",
+      "pasos": [
+        "Coloca los pies al ancho de tus hombros",
+        "Desciende controladamente como si fueras a sentarte en una silla",
+        "Empuja con fuerza hacia arriba manteniendo la espalda derecha"
+      ]
+    },
+    {
+      "id": 10,
+      "categoria": "acondicionamiento fisico",
+      "titulo": "Realiza pausas activas en tu trabajo",
+      "descripcion": "Romper el sedentarismo cada pocas horas previene dolores de espalda, fatiga visual y mejora la productividad mental.",
+      "tiempo": "5 minutos",
+      "dificultad": "Fácil",
+      "pasos": [
+        "Programa una alarma cada 2 horas de estudio o trabajo",
+        "Ponte de pie, camina por la habitación y sacude tus extremidades",
+        "Haz 5 rotaciones de cadera y estira suavemente tu espalda"
+      ]
+    }
+  ]
+}
