@@ -251,41 +251,6 @@ export function DailyChallenge({
           )}
         </AnimatePresence>
 
-        {/* Week Progress */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="rounded-3xl bg-card p-6 shadow-md"
-        >
-          <h3 className="mb-4 text-foreground">Tu progreso esta semana</h3>
-          <div className="flex justify-between gap-2">
-            {weekProgress.map((day, index) => (
-              <div key={index} className="flex flex-1 flex-col items-center gap-2">
-                <span className="text-sm text-muted-foreground">{day.day}</span>
-                <motion.div
-                  whileHover={{ scale: 1.1 }}
-                  className={`flex h-12 w-12 items-center justify-center rounded-full transition-colors ${
-                    day.isToday
-                      ? "border-2 border-primary bg-primary/10"
-                      : day.completed
-                        ? "bg-primary"
-                        : "bg-muted"
-                  }`}
-                >
-                  {day.completed && !day.isToday && (
-                    <CheckCircle2 className="h-5 w-5 text-primary-foreground" />
-                  )}
-                  {day.isToday && (
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary">
-                      <Flame className="h-4 w-4 text-primary-foreground" />
-                    </div>
-                  )}
-                </motion.div>
-              </div>
-            ))}
-          </div>
-        </motion.section>
       </main>
     </div>
   );
