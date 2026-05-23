@@ -1,0 +1,174 @@
+{
+  "alimentacion": [
+    {
+      "id": "a1",
+      "categoria": "Alimentación",
+      "emoji": "🥤",
+      "consejo": "Beber 8 vasos de agua al día mejora tu digestión, concentración y niveles de energía. ¡Empieza con un vaso al despertar!"
+    },
+    {
+      "id": "a2",
+      "categoria": "Alimentación",
+      "emoji": "🥗",
+      "consejo": "Incluir verduras de colores variados en cada comida garantiza un aporte diverso de vitaminas y antioxidantes."
+    },
+    {
+      "id": "a3",
+      "categoria": "Alimentación",
+      "emoji": "🍎",
+      "consejo": "Las frutas son el snack ideal. Una manzana, un banano o unas fresas te dan energía sin el bajón del azúcar procesado."
+    },
+    {
+      "id": "a4",
+      "categoria": "Alimentación",
+      "emoji": "🥚",
+      "consejo": "El desayuno con proteína (huevos, yogur, frutos secos) mantiene la saciedad más tiempo y evita el picoteo a media mañana."
+    },
+    {
+      "id": "a5",
+      "categoria": "Alimentación",
+      "emoji": "🍽️",
+      "consejo": "Comer despacio y sin pantallas te ayuda a reconocer la saciedad antes de excederte. ¡Tu digestión te lo agradecerá!"
+    },
+    {
+      "id": "a6",
+      "categoria": "Alimentación",
+      "emoji": "🫐",
+      "consejo": "Los arándanos, fresas y moras son superalimentos: bajos en calorías y llenos de antioxidantes que protegen el cerebro."
+    },
+    {
+      "id": "a7",
+      "categoria": "Alimentación",
+      "emoji": "🌾",
+      "consejo": "Elige pan integral, arroz integral o avena en lugar de sus versiones refinadas. La fibra es tu aliada para el control del peso."
+    },
+    {
+      "id": "a8",
+      "categoria": "Alimentación",
+      "emoji": "🫒",
+      "consejo": "Las grasas saludables del aguacate, el aceite de oliva y los frutos secos son esenciales para el corazón y la absorción de vitaminas."
+    },
+    {
+      "id": "a9",
+      "categoria": "Alimentación",
+      "emoji": "🧂",
+      "consejo": "Reducir la sal no significa comida sin sabor: las hierbas frescas (cilantro, albahaca, orégano) son tus mejores aliadas."
+    },
+    {
+      "id": "a10",
+      "categoria": "Alimentación",
+      "emoji": "☕",
+      "consejo": "Cambiar una bebida azucarada por agua con limón o té sin azúcar puede ahorrarte cientos de calorías vacías al día."
+    },
+    {
+      "id": "a11",
+      "categoria": "Alimentación",
+      "emoji": "🐟",
+      "consejo": "El pescado, especialmente el salmón, la sardina y el atún, aporta omega-3 que reduce la inflamación y mejora la salud cerebral."
+    },
+    {
+      "id": "a12",
+      "categoria": "Alimentación",
+      "emoji": "🫘",
+      "consejo": "Las legumbres (lentejas, fríjoles, garbanzos) son proteína vegetal de alta calidad y ricas en fibra. ¡Inclúyelas 3 veces a la semana!"
+    },
+    {
+      "id": "a13",
+      "categoria": "Alimentación",
+      "emoji": "🌙",
+      "consejo": "Evita comer en las dos horas previas a dormir. Una cena ligera mejora la calidad del sueño y la recuperación muscular."
+    },
+    {
+      "id": "a14",
+      "categoria": "Alimentación",
+      "emoji": "🍫",
+      "consejo": "El chocolate oscuro (70%+ cacao) en pequeñas cantidades aporta antioxidantes y mejora el humor. ¡Un placer consciente también cuenta!"
+    }
+  ],
+  "acondicionamiento": [
+    {
+      "id": "f1",
+      "categoria": "Acondicionamiento físico",
+      "emoji": "🧘",
+      "consejo": "5 minutos de estiramiento al despertar activan la circulación, reducen la rigidez y preparan tu cuerpo para el día."
+    },
+    {
+      "id": "f2",
+      "categoria": "Acondicionamiento físico",
+      "emoji": "🚶",
+      "consejo": "Caminar 30 minutos al día reduce el riesgo de enfermedades cardíacas, mejora el ánimo y es accesible para todos."
+    },
+    {
+      "id": "f3",
+      "categoria": "Acondicionamiento físico",
+      "emoji": "💪",
+      "consejo": "Los ejercicios de fuerza (sentadillas, planchas, flexiones) no solo tonifican: aceleran el metabolismo durante horas después del entreno."
+    },
+    {
+      "id": "f4",
+      "categoria": "Acondicionamiento físico",
+      "emoji": "🏃",
+      "consejo": "Alterna días de cardio con días de fuerza. Dar descanso a los músculos es parte del entrenamiento, no una excusa."
+    },
+    {
+      "id": "f5",
+      "categoria": "Acondicionamiento físico",
+      "emoji": "😴",
+      "consejo": "Dormir 7-8 horas es tan importante como entrenar. Durante el sueño profundo tus músculos se reparan y crecen."
+    },
+    {
+      "id": "f6",
+      "categoria": "Acondicionamiento físico",
+      "emoji": "🧗",
+      "consejo": "Subir escaleras en lugar del ascensor es una forma fácil de añadir actividad física a tu rutina sin ir al gimnasio."
+    },
+    {
+      "id": "f7",
+      "categoria": "Acondicionamiento físico",
+      "emoji": "🌬️",
+      "consejo": "La respiración diafragmática reduce el cortisol (hormona del estrés) y mejora el rendimiento en cualquier tipo de ejercicio."
+    },
+    {
+      "id": "f8",
+      "categoria": "Acondicionamiento físico",
+      "emoji": "🔥",
+      "consejo": "El HIIT (intervalos de alta intensidad) en solo 15-20 minutos quema más calorías que 45 minutos de cardio moderado."
+    },
+    {
+      "id": "f9",
+      "categoria": "Acondicionamiento físico",
+      "emoji": "🤸",
+      "consejo": "La flexibilidad es una capacidad física que se pierde si no se trabaja. Dedica al menos 10 minutos al día a estiramientos."
+    },
+    {
+      "id": "f10",
+      "categoria": "Acondicionamiento físico",
+      "emoji": "⚖️",
+      "consejo": "El equilibrio muscular es clave. Trabaja tanto los músculos que ves (pecho, bíceps) como los que no (espalda, isquiotibiales)."
+    },
+    {
+      "id": "f11",
+      "categoria": "Acondicionamiento físico",
+      "emoji": "🚴",
+      "consejo": "Montar en bicicleta o nadar son ejercicios de bajo impacto ideal para las articulaciones y con grandes beneficios cardiovasculares."
+    },
+    {
+      "id": "f12",
+      "categoria": "Acondicionamiento físico",
+      "emoji": "🧠",
+      "consejo": "El ejercicio libera endorfinas y serotonina. Solo 20 minutos de actividad física moderada mejoran el estado de ánimo por horas."
+    },
+    {
+      "id": "f13",
+      "categoria": "Acondicionamiento físico",
+      "emoji": "📅",
+      "consejo": "La consistencia supera la intensidad. Es mejor entrenar 20 minutos cada día que 2 horas una sola vez a la semana."
+    },
+    {
+      "id": "f14",
+      "categoria": "Acondicionamiento físico",
+      "emoji": "💧",
+      "consejo": "Hidratarte bien antes, durante y después del ejercicio mejora el rendimiento y acelera la recuperación muscular."
+    }
+  ]
+}

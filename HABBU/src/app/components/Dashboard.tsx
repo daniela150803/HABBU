@@ -14,7 +14,7 @@ import {
   Repeat,
   HeartPulse,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import habbuIconImg from "../../imports/3-2.png";
 import { HabbuCelebrationModal } from "./HabbuCelebrationModal";
 import { HabbuWelcomeModal } from "./HabbuWelcomeModal";
@@ -32,6 +32,7 @@ import emSad from "../../imports/Emotions/Sad.png";
 import emYoga from "../../imports/Emotions/Yoga.png";
 
 import emocionesData from "../data/emociones_habbu.json";
+import consejosData from "../data/consejos_habbu.json";
 
 const MOOD_IMAGES: Record<string, string[]> = {
   desmotivado: [emSad],
@@ -100,6 +101,14 @@ export function Dashboard({
   const [celebrationOpen, setCelebrationOpen] = useState(false);
   const [celebratedTitle, setCelebratedTitle] = useState<string | undefined>();
   const [welcomeOpen, setWelcomeOpen] = useState(false);
+
+  // ── Daily tip (seeded by calendar date so it changes each day but is stable within a session) ──
+  const dailyTip = useMemo(() => {
+    const allTips = [...consejosData.alimentacion, ...consejosData.acondicionamiento];
+    const today = new Date();
+    const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+    return allTips[seed % allTips.length];
+  }, []);
 
   // Show Habbu's welcome popup right after login/registration, once per session.
   useEffect(() => {
@@ -708,15 +717,23 @@ export function Dashboard({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="rounded-3xl bg-accent/20 p-6 shadow-md"
+            className="rounded-3xl bg-accent/20 p-6 shadow-md flex flex-col gap-3"
           >
-            <div className="mb-3 flex items-center gap-2">
+            <div className="flex items-center gap-2">
               <Lightbulb className="h-5 w-5 text-accent-foreground" />
               <h3 className="text-foreground">Consejo de Habbu</h3>
             </div>
-            <p className="text-sm text-muted-foreground">
-              Cambiar una bebida azucarada por agua también cuenta. Los pequeños cambios se suman.
-            </p>
+
+            {dailyTip && (
+              <>
+                <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-primary/15 px-3 py-0.5 text-[11px] font-semibold text-primary">
+                  {dailyTip.emoji} {dailyTip.categoria}
+                </span>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {dailyTip.consejo}
+                </p>
+              </>
+            )}
           </motion.div>
         </section>
       </main>
