@@ -17,55 +17,112 @@ import {
   HeartPulse,
   LogOut,
 } from "lucide-react";
-import {
-  HabbuMascot,
-  HabbuPose,
-  POSE_LIBRARY,
-  POSE_ORDER,
-} from "./HabbuMascot";
+import emDrinkWater from "../../imports/Emotions/Drink water.png";
+import emEatingSalad from "../../imports/Emotions/Eating salad.png";
+import emGreet from "../../imports/Emotions/Greet.png";
+import emHappy from "../../imports/Emotions/Happy.png";
+import emLiftingWeights from "../../imports/Emotions/Lifting Weights.png";
+import emMotivated from "../../imports/Emotions/Motivated.png";
+import emRelaxed from "../../imports/Emotions/Relaxed.png";
+import emRunning from "../../imports/Emotions/Running.png";
+import emSad from "../../imports/Emotions/Sad.png";
+import emYoga from "../../imports/Emotions/Yoga.png";
+
+import emocionesData from "../data/emociones_habbu.json";
+import { getDailyHabits } from "./habitsData";
 
 interface ProfileProps {
   userName: string;
   onBack: () => void;
   onSignOut?: () => void;
+  habitCompletion?: Record<string, boolean>;
+  dailyChallengeCompleted?: boolean;
+  dayStr?: string;
+  userInterests?: string[];
 }
 
-export function Profile({ userName, onBack, onSignOut }: ProfileProps) {
-  // Soft, non-competitive progress signal (0-1) — used only to choose the
-  // panda's expression and tone of message, NOT to count days or streaks.
-  const overallProgress = 0.6;
+const MOOD_IMAGES: Record<string, string[]> = {
+  desmotivado: [emSad],
+  triste: [emRelaxed, emSad],
+  tranquilo: [emYoga, emRelaxed],
+  motivado: [emMotivated, emYoga],
+  animado: [emRunning, emLiftingWeights, emDrinkWater],
+  emocionado: [emHappy, emGreet, emEatingSalad],
+};
 
-  // Panda mood derived softly from progress (no streaks, no day counts).
-  const moodInfo = (() => {
-    if (overallProgress >= 0.75)
-      return {
-        label: "Orgulloso",
-        defaultPose: "proud" as HabbuPose,
-        message: "Estoy orgulloso de cómo te estás cuidando.",
-        tone: "text-secondary",
-        bg: "bg-secondary/10",
-      };
-    if (overallProgress >= 0.4)
-      return {
-        label: "Animado",
-        defaultPose: "cheer" as HabbuPose,
-        message: "Vas muy bien, sigamos a tu ritmo.",
-        tone: "text-primary",
-        bg: "bg-primary/10",
-      };
-    return {
-      label: "Tranquilo",
-      defaultPose: "calm" as HabbuPose,
-      message: "Aquí estoy, sin prisa. Damos un paso cuando quieras.",
-      tone: "text-foreground",
-      bg: "bg-muted",
-    };
+export function Profile({
+  userName,
+  onBack,
+  onSignOut,
+  habitCompletion,
+  dailyChallengeCompleted,
+  dayStr,
+}: ProfileProps) {
+  const comp = habitCompletion || {};
+  const challengeDone = !!dailyChallengeCompleted;
+  const currentDayStr = dayStr || new Date().toISOString().split("T")[0];
+
+  const dailyHabits = getDailyHabits(currentDayStr);
+  const dailyHabitIds = [
+    ...dailyHabits.nutrition.map((h) => h.id),
+    ...dailyHabits.fitness.map((h) => h.id),
+  ];
+  const completedHabitsCount = dailyHabitIds.filter((id) => comp[id]).length;
+  const totalCompleted = completedHabitsCount + (challengeDone ? 1 : 0);
+  const overallProgress = totalCompleted / 5; // value between 0 and 1
+
+  const moodKey = (() => {
+    if (totalCompleted >= 5) return "emocionado";
+    if (totalCompleted === 4) return "animado";
+    if (totalCompleted === 3) return "motivado";
+    if (totalCompleted === 2) return "tranquilo";
+    if (totalCompleted === 1) return "triste";
+    return "desmotivado";
   })();
 
-  const [pose, setPose] = useState<HabbuPose>(moodInfo.defaultPose);
-  const [bubble, setBubble] = useState<string | undefined>(moodInfo.message);
-  const [celebratePulse, setCelebratePulse] = useState(0);
+  const moodInfo = (() => {
+    const config = {
+      desmotivado: {
+        label: "Desmotivado",
+        tone: "text-red-500",
+        bg: "bg-red-500/10",
+      },
+      triste: {
+        label: "Triste",
+        tone: "text-orange-500",
+        bg: "bg-orange-500/10",
+      },
+      tranquilo: {
+        label: "Tranquilo",
+        tone: "text-yellow-500",
+        bg: "bg-yellow-500/10",
+      },
+      motivado: {
+        label: "Motivado",
+        tone: "text-green-500",
+        bg: "bg-green-500/10",
+      },
+      animado: {
+        label: "Animado",
+        tone: "text-teal-500",
+        bg: "bg-teal-500/10",
+      },
+      emocionado: {
+        label: "Emocionado",
+        tone: "text-purple-500",
+        bg: "bg-purple-500/10",
+      },
+    };
+    return config[moodKey] || config.desmotivado;
+  })();
+
   const [welcomeOpen, setWelcomeOpen] = useState(false);
+  const [selectedPhrase, setSelectedPhrase] = useState("");
+  const [activeImage, setActiveImage] = useState(emSad);
+  const [bubble, setBubble] = useState("");
+  const [isInteracting, setIsInteracting] = useState(false);
+  const [isCelebrating, setIsCelebrating] = useState(false);
+  const [imageIndex, setImageIndex] = useState(0);
 
   // Show welcome popup once per browser session
   useEffect(() => {
@@ -81,25 +138,80 @@ export function Profile({ userName, onBack, onSignOut }: ProfileProps) {
     }
   }, []);
 
-  const setPoseWithBubble = (next: HabbuPose, customBubble?: string) => {
-    setPose(next);
-    setBubble(customBubble ?? POSE_LIBRARY[next].bubble);
+  // Sync state with mood changes deterministically
+  useEffect(() => {
+    const defaultImg = MOOD_IMAGES[moodKey][0];
+    setActiveImage(defaultImg);
+    setImageIndex(0);
+
+    const data = (emocionesData.emociones as Record<string, { nombre: string; frases: string[] }>)[moodKey];
+    const frases = data?.frases || ["¡Sigue adelante!"];
+    let seed = 0;
+    const keyString = `${userName}-${currentDayStr}-${moodKey}`;
+    for (let i = 0; i < keyString.length; i++) {
+      seed += keyString.charCodeAt(i);
+    }
+    const idx = seed % frases.length;
+    const phrase = frases[idx];
+    setSelectedPhrase(phrase);
+    setBubble(phrase);
+  }, [moodKey, userName, currentDayStr]);
+
+  const sayHi = () => {
+    setIsInteracting(true);
+    setActiveImage(emGreet);
+    setBubble(`¡Hola, ${userName}! Me alegra saludarte hoy. 👋`);
+    setTimeout(() => setIsInteracting(false), 1200);
+  };
+
+  const patPanda = () => {
+    setIsInteracting(true);
+    const petImg = MOOD_IMAGES[moodKey].includes(emHappy) ? emHappy : emRelaxed;
+    setActiveImage(petImg);
+    setBubble("¡Qué lindo gesto! Me encantan las caricias. 🐼❤️");
+    setTimeout(() => setIsInteracting(false), 1200);
+  };
+
+  const celebrate = () => {
+    setIsInteracting(true);
+    setIsCelebrating(true);
+    setActiveImage(emHappy);
+    setBubble("¡Eso es! ¡Vamos juntos por más bienestar! 🎉");
+    setTimeout(() => {
+      setIsInteracting(false);
+      setIsCelebrating(false);
+    }, 1500);
   };
 
   const cyclePose = () => {
-    const idx = POSE_ORDER.indexOf(pose);
-    const next = POSE_ORDER[(idx + 1) % POSE_ORDER.length];
-    setPoseWithBubble(next);
+    const images = MOOD_IMAGES[moodKey];
+    const nextIdx = (imageIndex + 1) % images.length;
+    setImageIndex(nextIdx);
+    setActiveImage(images[nextIdx]);
+
+    const poseMessages: Record<string, string> = {
+      [emRunning]: "¡Estoy listo para correr! 🏃",
+      [emLiftingWeights]: "¡Un poco de fuerza! 💪",
+      [emDrinkWater]: "¡Salud por la hidratación! 💧",
+      [emEatingSalad]: "¡Hora de comer saludable! 🥗",
+      [emYoga]: "Buscando mi centro... 🧘",
+      [emRelaxed]: "Un momento de paz. 🌸",
+      [emSad]: "Un día a la vez... 🍂",
+      [emHappy]: "¡Me siento súper bien! 😄",
+      [emGreet]: "¡Hola de nuevo! 👋",
+      [emMotivated]: "¡Vamos con toda la actitud! ✨"
+    };
+    const key = images[nextIdx];
+    if (poseMessages[key]) {
+      setBubble(poseMessages[key]);
+    }
   };
 
-  const sayHi = () => setPoseWithBubble("wave", "¡Hola, " + userName + "!");
-  const patPanda = () => setPoseWithBubble("happy", "¡Qué lindo gesto!");
-  const celebrate = () => {
-    setPoseWithBubble("celebrate", "¡Vamos juntos por más!");
-    setCelebratePulse((p) => p + 1);
+  const checkMood = () => {
+    setActiveImage(MOOD_IMAGES[moodKey][0]);
+    setImageIndex(0);
+    setBubble(selectedPhrase);
   };
-  const checkMood = () =>
-    setPoseWithBubble(moodInfo.defaultPose, moodInfo.message);
 
   const greetingByTime = (() => {
     const h = new Date().getHours();
@@ -133,8 +245,8 @@ export function Profile({ userName, onBack, onSignOut }: ProfileProps) {
         onClose={() => setWelcomeOpen(false)}
         userName={userName}
         onAcceptChallenge={() => {
-          setPose("cheer");
-          setBubble("¡Vamos por el reto de hoy!");
+          setActiveImage(emMotivated);
+          setBubble("¡Vamos por el reto de hoy! 🚀");
         }}
       />
 
@@ -217,19 +329,101 @@ export function Profile({ userName, onBack, onSignOut }: ProfileProps) {
           <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-primary/10 via-accent/10 to-secondary/10 p-8 shadow-md">
             <div className="grid grid-cols-1 items-center gap-8 md:grid-cols-[auto,1fr]">
               <div className="flex flex-col items-center gap-3">
-                <HabbuMascot
-                  key={celebratePulse}
-                  variant="friendly"
-                  pose={pose}
-                  bubbleMessage={bubble}
-                  completed={Math.round(overallProgress * 10)}
-                  total={10}
-                  celebrate={celebratePulse > 0 && pose === "celebrate"}
-                  size={220}
-                  showBubble
-                  showBadge={false}
-                  onPandaClick={cyclePose}
-                />
+                <div className="relative flex flex-col items-center" style={{ minHeight: 280 }}>
+                  {/* Glowing background */}
+                  <motion.div
+                    aria-hidden
+                    className="absolute top-[80px] -z-10 rounded-full blur-2xl opacity-40 bg-gradient-to-tr from-primary to-secondary"
+                    style={{
+                      width: 180,
+                      height: 180,
+                    }}
+                    animate={
+                      isInteracting
+                        ? { scale: [1, 1.2, 1], opacity: [0.4, 0.7, 0.4] }
+                        : { scale: [1, 1.05, 1], opacity: [0.35, 0.45, 0.35] }
+                    }
+                    transition={{
+                      duration: isInteracting ? 0.6 : 3,
+                      repeat: isInteracting ? 0 : Infinity,
+                      ease: "easeInOut",
+                    }}
+                  />
+
+                  {/* Speech Bubble */}
+                  <div className="h-16 flex items-end justify-center mb-2">
+                    {bubble && (
+                      <motion.div
+                        key={bubble}
+                        initial={{ opacity: 0, y: 6, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -4, scale: 0.95 }}
+                        transition={{ duration: 0.28 }}
+                        className="relative max-w-[260px] rounded-2xl bg-card border border-border px-4 py-1.5 text-center text-xs text-foreground shadow-sm"
+                      >
+                        <span
+                          aria-hidden
+                          className="absolute -bottom-1 left-1/2 h-2.5 w-2.5 -translate-x-1/2 rotate-45 border-r border-b border-border bg-card"
+                        />
+                        {bubble}
+                      </motion.div>
+                    )}
+                  </div>
+
+                  {/* Panda Mascot Image */}
+                  <motion.button
+                    type="button"
+                    onClick={patPanda}
+                    aria-label="Saludar a Habbu"
+                    whileHover={{ scale: 1.04 }}
+                    whileTap={{ scale: 0.96 }}
+                    animate={
+                      isCelebrating
+                        ? { scale: [1, 1.1, 1], rotate: [0, -6, 6, -4, 0], y: [0, -12, 0] }
+                        : isInteracting
+                          ? { rotate: [0, -3, 3, -2, 0], scale: [1, 1.03, 1] }
+                          : { y: [0, -6, 0], scale: [1, 1.015, 1] }
+                    }
+                    transition={
+                      isCelebrating
+                        ? { duration: 0.8 }
+                        : isInteracting
+                          ? { duration: 0.6 }
+                          : { duration: 3.2, repeat: Infinity, ease: "easeInOut" }
+                    }
+                    className="relative cursor-pointer select-none rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    style={{ width: 180, height: 180 }}
+                  >
+                    <img
+                      src={activeImage}
+                      alt="Habbu"
+                      draggable={false}
+                      className="h-full w-full object-contain"
+                    />
+
+                    {/* Celebration / Petting particle burst */}
+                    {isCelebrating && (
+                      <div className="absolute inset-0 pointer-events-none">
+                        {[...Array(8)].map((_, i) => {
+                          const angle = (i / 8) * Math.PI * 2;
+                          const dx = Math.cos(angle) * 90;
+                          const dy = Math.sin(angle) * 90;
+                          return (
+                            <motion.div
+                              key={i}
+                              initial={{ x: 0, y: 0, opacity: 0, scale: 0.4 }}
+                              animate={{ x: dx, y: dy, opacity: [0, 1, 0], scale: [0.4, 1.1, 0.7] }}
+                              transition={{ duration: 0.9, ease: "easeOut" }}
+                              className="absolute left-1/2 top-1/2 text-primary"
+                            >
+                              {i % 2 === 0 ? "✨" : "❤️"}
+                            </motion.div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </motion.button>
+                </div>
 
                 {/* Interaction chips */}
                 <div className="flex flex-wrap justify-center gap-2">
@@ -275,7 +469,7 @@ export function Profile({ userName, onBack, onSignOut }: ProfileProps) {
                   {greetingByTime}, {userName}
                 </h1>
                 <p className="mb-5 text-lg text-muted-foreground">
-                  {moodInfo.message}
+                  {selectedPhrase}
                 </p>
 
                 {/* Mini progress reflection inside the card */}
@@ -284,7 +478,7 @@ export function Profile({ userName, onBack, onSignOut }: ProfileProps) {
                     <span className="text-muted-foreground">
                       Cómo Habbu siente tu avance
                     </span>
-                    <span className={moodInfo.tone}>{moodInfo.label}</span>
+                    <span className={`font-semibold ${moodInfo.tone}`}>{moodInfo.label}</span>
                   </div>
                   <div className="relative h-2.5 overflow-hidden rounded-full bg-muted">
                     <motion.div
@@ -294,6 +488,16 @@ export function Profile({ userName, onBack, onSignOut }: ProfileProps) {
                       className="h-full rounded-full bg-gradient-to-r from-primary to-secondary"
                     />
                   </div>
+
+                  {/* Milestones labels */}
+                  <div className="mt-2 flex justify-between text-[10px] text-muted-foreground px-1">
+                    <span className={totalCompleted === 0 ? "text-primary font-medium" : ""}>Desmotivado</span>
+                    <span className={totalCompleted === 1 ? "text-primary font-medium" : ""}>Triste</span>
+                    <span className={totalCompleted === 2 ? "text-primary font-medium" : ""}>Tranquilo</span>
+                    <span className={totalCompleted === 3 ? "text-primary font-medium" : ""}>Motivado</span>
+                    <span className={totalCompleted === 4 ? "text-primary font-medium" : ""}>Animado</span>
+                    <span className={totalCompleted === 5 ? "text-primary font-medium" : ""}>Emocionado</span>
+                  </div>
                 </div>
 
                 <div className="rounded-2xl bg-card/80 p-4 backdrop-blur">
@@ -301,7 +505,7 @@ export function Profile({ userName, onBack, onSignOut }: ProfileProps) {
                     “No se trata de hacerlo perfecto, sino de seguir contigo.”
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    — Habbu · pose actual: {POSE_LIBRARY[pose].label.toLowerCase()}
+                    — Habbu · estado: {moodInfo.label.toLowerCase()}
                   </p>
                 </div>
               </div>

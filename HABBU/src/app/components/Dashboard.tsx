@@ -8,13 +8,39 @@ import {
   Circle,
   ChevronRight,
   Lightbulb,
+  Hand,
+  Smile,
+  PartyPopper,
+  Repeat,
+  HeartPulse,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import habbuDashImg from "../../imports/10.png";
 import habbuIconImg from "../../imports/3-2.png";
 import { HabbuCelebrationModal } from "./HabbuCelebrationModal";
 import { HabbuWelcomeModal } from "./HabbuWelcomeModal";
 import { getDailyHabits, getDailyChallengeForDay, getWeekDateStrings } from "./habitsData";
+
+import emDrinkWater from "../../imports/Emotions/Drink water.png";
+import emEatingSalad from "../../imports/Emotions/Eating salad.png";
+import emGreet from "../../imports/Emotions/Greet.png";
+import emHappy from "../../imports/Emotions/Happy.png";
+import emLiftingWeights from "../../imports/Emotions/Lifting Weights.png";
+import emMotivated from "../../imports/Emotions/Motivated.png";
+import emRelaxed from "../../imports/Emotions/Relaxed.png";
+import emRunning from "../../imports/Emotions/Running.png";
+import emSad from "../../imports/Emotions/Sad.png";
+import emYoga from "../../imports/Emotions/Yoga.png";
+
+import emocionesData from "../data/emociones_habbu.json";
+
+const MOOD_IMAGES: Record<string, string[]> = {
+  desmotivado: [emSad],
+  triste: [emRelaxed, emSad],
+  tranquilo: [emYoga, emRelaxed],
+  motivado: [emMotivated, emYoga],
+  animado: [emRunning, emLiftingWeights, emDrinkWater],
+  emocionado: [emHappy, emGreet, emEatingSalad],
+};
 
 interface DashboardProps {
   userName: string;
@@ -98,18 +124,149 @@ export function Dashboard({
   }));
 
   const completedCount = habits.filter((h) => h.completed).length;
-  const totalCount = habits.length;
-  const progressPercentage = (completedCount / totalCount) * 100;
+  const challengeDone = !!dailyChallengeCompleted;
+  const totalCompleted = completedCount + (challengeDone ? 1 : 0);
+  const overallProgress = totalCompleted / 5; // value between 0 and 1
+  const progressPercentage = overallProgress * 100;
+  const totalCount = 5; // 4 habits + 1 daily challenge
 
   const nutritionPending = habits.filter((h) => h.category === "nutrition" && !h.completed).length;
   const fitnessPending = habits.filter((h) => h.category === "fitness" && !h.completed).length;
+
+  const moodKey = (() => {
+    if (totalCompleted >= 5) return "emocionado";
+    if (totalCompleted === 4) return "animado";
+    if (totalCompleted === 3) return "motivado";
+    if (totalCompleted === 2) return "tranquilo";
+    if (totalCompleted === 1) return "triste";
+    return "desmotivado";
+  })();
+
+  const moodInfo = (() => {
+    const config = {
+      desmotivado: {
+        label: "Desmotivado",
+        tone: "text-red-500",
+        bg: "bg-red-500/10",
+      },
+      triste: {
+        label: "Triste",
+        tone: "text-orange-500",
+        bg: "bg-orange-500/10",
+      },
+      tranquilo: {
+        label: "Tranquilo",
+        tone: "text-yellow-500",
+        bg: "bg-yellow-500/10",
+      },
+      motivado: {
+        label: "Motivado",
+        tone: "text-green-500",
+        bg: "bg-green-500/10",
+      },
+      animado: {
+        label: "Animado",
+        tone: "text-teal-500",
+        bg: "bg-teal-500/10",
+      },
+      emocionado: {
+        label: "Emocionado",
+        tone: "text-purple-500",
+        bg: "bg-purple-500/10",
+      },
+    };
+    return config[moodKey] || config.desmotivado;
+  })();
+
+  const [selectedPhrase, setSelectedPhrase] = useState("");
+  const [activeImage, setActiveImage] = useState(emSad);
+  const [bubble, setBubble] = useState("");
+  const [isInteracting, setIsInteracting] = useState(false);
+  const [isCelebrating, setIsCelebrating] = useState(false);
+  const [imageIndex, setImageIndex] = useState(0);
+
+  // Sync state with mood changes
+  useEffect(() => {
+    const defaultImg = MOOD_IMAGES[moodKey][0];
+    setActiveImage(defaultImg);
+    setImageIndex(0);
+
+    const data = (emocionesData.emociones as Record<string, { nombre: string; frases: string[] }>)[moodKey];
+    const frases = data?.frases || ["¡Sigue adelante!"];
+    let seed = 0;
+    const keyString = `${userName}-${dayStr}-${moodKey}`;
+    for (let i = 0; i < keyString.length; i++) {
+      seed += keyString.charCodeAt(i);
+    }
+    const idx = seed % frases.length;
+    const phrase = frases[idx];
+    setSelectedPhrase(phrase);
+    setBubble(phrase);
+  }, [moodKey, userName, dayStr]);
+
+  const sayHi = () => {
+    setIsInteracting(true);
+    setActiveImage(emGreet);
+    setBubble(`¡Hola, ${userName}! Me alegra saludarte hoy. 👋`);
+    setTimeout(() => setIsInteracting(false), 1200);
+  };
+
+  const patPanda = () => {
+    setIsInteracting(true);
+    const petImg = MOOD_IMAGES[moodKey].includes(emHappy) ? emHappy : emRelaxed;
+    setActiveImage(petImg);
+    setBubble("¡Qué lindo gesto! Me encantan las caricias. 🐼❤️");
+    setTimeout(() => setIsInteracting(false), 1200);
+  };
+
+  const celebrateAction = () => {
+    setIsInteracting(true);
+    setIsCelebrating(true);
+    setActiveImage(emHappy);
+    setBubble("¡Eso es! ¡Vamos juntos por más bienestar! 🎉");
+    setTimeout(() => {
+      setIsInteracting(false);
+      setIsCelebrating(false);
+    }, 1500);
+  };
+
+  const cyclePose = () => {
+    const images = MOOD_IMAGES[moodKey];
+    const nextIdx = (imageIndex + 1) % images.length;
+    setImageIndex(nextIdx);
+    setActiveImage(images[nextIdx]);
+
+    const poseMessages: Record<string, string> = {
+      [emRunning]: "¡Estoy listo para correr! 🏃",
+      [emLiftingWeights]: "¡Un poco de fuerza! 💪",
+      [emDrinkWater]: "¡Salud por la hidratación! 💧",
+      [emEatingSalad]: "¡Hora de comer saludable! 🥗",
+      [emYoga]: "Buscando mi centro... 🧘",
+      [emRelaxed]: "Un momento de paz. 🌸",
+      [emSad]: "Un día a la vez... 🍂",
+      [emHappy]: "¡Me siento súper bien! 😄",
+      [emGreet]: "¡Hola de nuevo! 👋",
+      [emMotivated]: "¡Vamos con toda la actitud! ✨"
+    };
+    const key = images[nextIdx];
+    if (poseMessages[key]) {
+      setBubble(poseMessages[key]);
+    }
+  };
+
+  const checkMood = () => {
+    setActiveImage(MOOD_IMAGES[moodKey][0]);
+    setImageIndex(0);
+    setBubble(selectedPhrase);
+  };
 
   const handleDailyChallengeToggle = () => {
     if (!dailyChallengeCompleted) {
       setShowCompletionMessage(true);
       setTimeout(() => setShowCompletionMessage(false), 3000);
-      setCelebratedTitle("Toma 2 vasos extra de agua y camina 15 minutos");
+      setCelebratedTitle(dailyChallenge.titulo);
       setCelebrationOpen(true);
+      celebrateAction();
     }
     onToggleDailyChallenge();
   };
@@ -119,6 +276,7 @@ export function Dashboard({
     if (habit && !habit.completed) {
       setCelebratedTitle(habit.title);
       setCelebrationOpen(true);
+      celebrateAction();
     }
     onToggleHabit(id);
   };
@@ -192,8 +350,8 @@ export function Dashboard({
                       </div>
                     </div>
                     <div className="flex-1">
-                      <p className="mb-4 text-lg text-foreground">
-                        Hoy vamos poco a poco. Ya diste el primer paso.
+                      <p className="mb-4 text-lg text-muted-foreground italic">
+                        “{selectedPhrase}”
                       </p>
                       <motion.button
                         onClick={onViewChallenge}
@@ -209,28 +367,136 @@ export function Dashboard({
               </motion.div>
             </div>
 
-            {/* Habbu Illustration */}
+            {/* Habbu Mascot Panel */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="hidden lg:flex lg:justify-center"
+              className="flex flex-col items-center justify-center bg-card/30 border border-border/50 p-6 rounded-3xl backdrop-blur-sm shadow-sm"
             >
-              <motion.div
-                animate={{
-                  y: [0, -8, 0],
-                }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              >
-                <img
-                  src={habbuDashImg}
-                  alt="Habbu"
-                  className="h-64 w-64 object-contain"
+              <div className="relative flex flex-col items-center" style={{ minHeight: 360 }}>
+                {/* Glowing background */}
+                <motion.div
+                  aria-hidden
+                  className="absolute top-[100px] -z-10 rounded-full blur-2xl opacity-40 bg-gradient-to-tr from-primary to-secondary"
+                  style={{
+                    width: 250,
+                    height: 210,
+                  }}
+                  animate={
+                    isInteracting
+                      ? { scale: [1, 1.2, 1], opacity: [0.4, 0.7, 0.4] }
+                      : { scale: [1, 1.05, 1], opacity: [0.35, 0.45, 0.35] }
+                  }
+                  transition={{
+                    duration: isInteracting ? 0.6 : 3,
+                    repeat: isInteracting ? 0 : Infinity,
+                    ease: "easeInOut",
+                  }}
                 />
-              </motion.div>
+
+                {/* Speech Bubble */}
+                <div className="h-20 flex items-end justify-center mb-3">
+                  {bubble && (
+                    <motion.div
+                      key={bubble}
+                      initial={{ opacity: 0, y: 6, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -4, scale: 0.95 }}
+                      transition={{ duration: 0.28 }}
+                      className="relative max-w-[290px] rounded-2xl bg-card border border-border px-4 py-2 text-center text-xs text-foreground shadow-sm"
+                    >
+                      <span
+                        aria-hidden
+                        className="absolute -bottom-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 border-r border-b border-border bg-card"
+                      />
+                      {bubble}
+                    </motion.div>
+                  )}
+                </div>
+
+                {/* Panda Mascot Image */}
+                <motion.button
+                  type="button"
+                  onClick={patPanda}
+                  aria-label="Saludar a Habbu"
+                  whileHover={{ scale: 1.04 }}
+                  whileTap={{ scale: 0.96 }}
+                  animate={
+                    isCelebrating
+                      ? { scale: [1, 1.1, 1], rotate: [0, -6, 6, -4, 0], y: [0, -12, 0] }
+                      : isInteracting
+                        ? { rotate: [0, -3, 3, -2, 0], scale: [1, 1.03, 1] }
+                        : { y: [0, -6, 0], scale: [1, 1.015, 1] }
+                  }
+                  transition={
+                    isCelebrating
+                      ? { duration: 0.8 }
+                      : isInteracting
+                        ? { duration: 0.6 }
+                        : { duration: 3.2, repeat: Infinity, ease: "easeInOut" }
+                  }
+                  className="relative cursor-pointer select-none rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  style={{ width: 210, height: 210 }}
+                >
+                  <img
+                    src={activeImage}
+                    alt="Habbu"
+                    draggable={false}
+                    className="h-full w-full object-contain"
+                  />
+
+                  {/* Celebration / Petting particle burst */}
+                  {isCelebrating && (
+                    <div className="absolute inset-0 pointer-events-none">
+                      {[...Array(6)].map((_, i) => {
+                        const angle = (i / 6) * Math.PI * 2;
+                        const dx = Math.cos(angle) * 90;
+                        const dy = Math.sin(angle) * 90;
+                        return (
+                          <motion.div
+                            key={i}
+                            initial={{ x: 0, y: 0, opacity: 0, scale: 0.4 }}
+                            animate={{ x: dx, y: dy, opacity: [0, 1, 0], scale: [0.4, 1.1, 0.7] }}
+                            transition={{ duration: 0.9, ease: "easeOut" }}
+                            className="absolute left-1/2 top-1/2 text-primary text-xs"
+                          >
+                            {i % 2 === 0 ? "✨" : "❤️"}
+                          </motion.div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </motion.button>
+              </div>
+
+              {/* Mascot Interaction Chips */}
+              <div className="mt-5 flex flex-wrap justify-center gap-2">
+                <DashboardChip
+                  icon={<Hand className="h-3.5 w-3.5" />}
+                  label="Saludar"
+                  onClick={sayHi}
+                />
+                <DashboardChip
+                  icon={<Smile className="h-3.5 w-3.5" />}
+                  label="Acariciar"
+                  onClick={patPanda}
+                />
+                <DashboardChip
+                  icon={<PartyPopper className="h-3.5 w-3.5" />}
+                  label="Celebrar"
+                  onClick={celebrateAction}
+                />
+                <DashboardChip
+                  icon={<Repeat className="h-3.5 w-3.5" />}
+                  label="Otra pose"
+                  onClick={cyclePose}
+                />
+                <DashboardChip
+                  icon={<HeartPulse className="h-3.5 w-3.5" />}
+                  label="Ánimo"
+                  onClick={checkMood}
+                />
+              </div>
             </motion.div>
           </div>
         </section>
@@ -245,13 +511,18 @@ export function Dashboard({
           >
             <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
               <div className="flex-1">
-                <h2 className="mb-3 text-foreground">Tu progreso de hoy</h2>
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-foreground">Tu progreso de hoy</h2>
+                  <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${moodInfo.bg} ${moodInfo.tone}`}>
+                    Habbu está: {moodInfo.label}
+                  </span>
+                </div>
                 <div className="mb-3">
                   <div className="mb-2 flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">
-                      {completedCount} de {totalCount} hábitos completados
+                      {totalCompleted} de {totalCount} actividades completadas (4 hábitos + 1 reto diario)
                     </span>
-                    <span className="text-foreground">{Math.round(progressPercentage)}%</span>
+                    <span className="text-foreground font-medium">{Math.round(progressPercentage)}%</span>
                   </div>
                   <div className="relative h-3 overflow-hidden rounded-full bg-muted">
                     <motion.div
@@ -261,14 +532,25 @@ export function Dashboard({
                       className="h-full rounded-full bg-gradient-to-r from-primary to-secondary"
                     />
                   </div>
+
+                  {/* Milestones labels */}
+                  <div className="mt-2 flex justify-between text-[9px] sm:text-[10px] text-muted-foreground px-1">
+                    <span className={totalCompleted === 0 ? "text-primary font-medium" : ""}>Desmotivado</span>
+                    <span className={totalCompleted === 1 ? "text-primary font-medium" : ""}>Triste</span>
+                    <span className={totalCompleted === 2 ? "text-primary font-medium" : ""}>Tranquilo</span>
+                    <span className={totalCompleted === 3 ? "text-primary font-medium" : ""}>Motivado</span>
+                    <span className={totalCompleted === 4 ? "text-primary font-medium" : ""}>Animado</span>
+                    <span className={totalCompleted === 5 ? "text-primary font-medium" : ""}>Emocionado</span>
+                  </div>
                 </div>
               </div>
               <motion.button
+                onClick={onViewChallenge}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="rounded-full border-2 border-primary px-6 py-3 text-primary hover:bg-primary/5"
               >
-                Continuar
+                Ver Retos
               </motion.button>
             </div>
           </motion.div>
@@ -439,5 +721,27 @@ export function Dashboard({
         </section>
       </main>
     </div>
+  );
+}
+
+function DashboardChip({
+  icon,
+  label,
+  onClick,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <motion.button
+      onClick={onClick}
+      whileHover={{ scale: 1.04, y: -1 }}
+      whileTap={{ scale: 0.96 }}
+      className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground shadow-sm hover:bg-muted/60"
+    >
+      <span className="text-primary">{icon}</span>
+      {label}
+    </motion.button>
   );
 }

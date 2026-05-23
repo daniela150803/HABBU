@@ -1,0 +1,52 @@
+{
+  "emociones": {
+    "desmotivado": {
+      "nombre": "Desmotivado",
+      "frases": [
+        "Hoy ha sido un día de recarga pasiva. No te presiones, descansar también es parte del camino.",
+        "A veces, el mayor logro es simplemente darte una pausa. Habbu te acompaña en tu descanso.",
+        "No todos los días tienen que ser activos. Respira hondo y haz lo que puedas, sin prisas."
+      ]
+    },
+    "triste": {
+      "nombre": "Triste",
+      "frases": [
+        "¡Completaste una actividad hoy! Aunque la energía esté baja, ese pequeño paso es muy valioso.",
+        "Un solo paso ya marca la diferencia. Valora el esfuerzo de hoy, por pequeño que parezca.",
+        "Poco a poco. Hoy diste un paso por ti, y eso es algo que vale la pena reconocer."
+      ]
+    },
+    "tranquilo": {
+      "nombre": "Tranquilo",
+      "frases": [
+        "Dos actividades completadas hoy. Estás manteniendo un ritmo excelente y equilibrado.",
+        "Paso a paso construimos el hábito. Disfruta este día calmado y balanceado.",
+        "Escuchaste a tu cuerpo hoy. Vamos a un ritmo saludable y constante."
+      ]
+    },
+    "motivado": {
+      "nombre": "Motivado",
+      "frases": [
+        "¡Qué gran energía tienes! Tres logros es un progreso fantástico para tu bienestar.",
+        "Se siente el avance hoy. Estás cultivando hábitos excelentes con mucha dedicación.",
+        "La constancia da sus frutos. ¡Sigue con esa gran actitud, vas muy bien!"
+      ]
+    },
+    "animado": {
+      "nombre": "Animado",
+      "frases": [
+        "¡Increíble! Cuatro actividades completadas hoy. Te estás cuidando de verdad.",
+        "Estás a solo un paso de completarlo todo. ¡Tu esfuerzo hoy es muy inspirador!",
+        "¡Qué fuerza tienes hoy! Habbu está feliz de ver lo activo que te has mantenido."
+      ]
+    },
+    "emocionado": {
+      "nombre": "Emocionado",
+      "frases": [
+        "¡Día perfecto! Completaste todas tus actividades de hoy. ¡Eres un súper Habbu!",
+        "¡Espectacular! Diste el 100% por tu salud y bienestar el día de hoy.",
+        "¡Habbu está celebrando a lo grande contigo! Lograste todo lo propuesto para hoy."
+      ]
+    }
+  }
+}

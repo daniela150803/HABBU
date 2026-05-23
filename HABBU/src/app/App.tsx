@@ -283,7 +283,15 @@ export default function App() {
         />
       )}
       {currentScreen === "profile" && (
-        <Profile userName={userName} onBack={handleBackToDashboard} onSignOut={handleSignOut} />
+        <Profile
+          userName={userName}
+          onBack={handleBackToDashboard}
+          onSignOut={handleSignOut}
+          habitCompletion={habitCompletion}
+          dailyChallengeCompleted={dailyChallengeCompleted}
+          dayStr={dayStr}
+          userInterests={userInterests}
+        />
       )}
       <PrivacyConsentModal
         open={needsPrivacyConsent}
