@@ -394,13 +394,14 @@ export function FitnessHabits({
               </div>
             </motion.div>
 
-            {/* Continue Button */}
+            {/* Back Button */}
             <motion.button
+              onClick={onBack}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               className="w-full rounded-full bg-secondary px-6 py-4 text-secondary-foreground shadow-lg hover:bg-secondary/90"
             >
-              Continuar
+              Regresar
             </motion.button>
           </aside>
         </div>
